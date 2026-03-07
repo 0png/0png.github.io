@@ -1,5 +1,6 @@
 ---
 import type { Project } from '@/data/projects'
+import { buttonVariants } from '@/components/ui/button'
 
 interface Props {
   project: Project
@@ -71,7 +72,7 @@ const { title, excerpt, tags, devlogSlug, coverImage, year } = project
         <div class="border-t border-white/[0.06] pt-4">
           <a
             href={'/blog/' + devlogSlug}
-            class="group/link inline-flex items-center gap-2 text-sm font-medium text-white/60 transition-colors hover:text-white"
+            class={buttonVariants({ variant: 'ghost', size: 'sm' }) + ' gap-2'}
           >
             View Devlog
             <svg
@@ -84,7 +85,6 @@ const { title, excerpt, tags, devlogSlug, coverImage, year } = project
               stroke-width="2"
               stroke-linecap="round"
               stroke-linejoin="round"
-              class="transition-transform group-hover/link:translate-x-0.5"
             >
               <path d="M5 12h14" />
               <path d="m12 5 7 7-7 7" />

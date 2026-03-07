@@ -1,0 +1,54 @@
+---
+import BaseLayout from './BaseLayout.astro'
+
+interface Props {
+  title: string
+  date: string
+  projectId: string
+}
+
+const { title, date, projectId } = Astro.props
+
+const formattedDate = date
+  ? new Date(date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    })
+  : ''
+---
+
+<BaseLayout title={title}>
+  <main class="mx-auto max-w-3xl px-6 py-16">
+    <a
+      href={`/#projects`}
+      data-project-id={projectId}
+      class="mb-8 inline-flex items-center gap-2 text-sm text-white/40 transition-colors hover:text-white"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="14"
+        height="14"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M19 12H5"></path>
+        <path d="m12 19-7-7 7-7"></path>
+      </svg>
+      Back to projects
+    </a>
+
+    <header class="mb-10">
+      {formattedDate && <p class="mb-3 text-sm text-white/40">{formattedDate}</p>}
+      <h1 class="text-4xl font-bold tracking-tight text-foreground">{title}</h1>
+    </header>
+
+    <article class="prose prose-invert max-w-none">
+      <slot />
+    </article>
+  </main>
+</BaseLayout>
