@@ -1,0 +1,97 @@
+---
+import type { Project } from '@/data/projects'
+
+interface Props {
+  project: Project
+}
+
+const { project } = Astro.props
+const { title, excerpt, tags, devlogSlug, coverImage, year } = project
+---
+
+<article
+  class="project-card group relative flex w-[340px] shrink-0 flex-col overflow-hidden rounded-2xl border border-white/[0.06] bg-card transition-all duration-500 hover:border-white/[0.14] md:w-[380px]"
+>
+  <!-- Cover area -->
+  <div class="relative h-52 overflow-hidden bg-gradient-to-br from-white/[0.05] to-transparent">
+    {
+      coverImage ? (
+        <img
+          src={coverImage}
+          alt={`Cover image for ${title}`}
+          class="h-full w-full object-cover opacity-50 transition-transform duration-700 group-hover:scale-105"
+        />
+      ) : (
+        <div
+          class="absolute inset-0"
+          style="background: radial-gradient(ellipse 80% 60% at 30% 40%, rgba(255,255,255,0.04) 0%, transparent 70%);"
+        />
+      )
+    }
+    <!-- Ghost year -->
+    <span
+      class="pointer-events-none absolute bottom-3 right-4 select-none font-black leading-none tracking-tighter text-white/[0.06]"
+      style="font-size: clamp(5rem, 10vw, 7rem);"
+    >
+      {year}
+    </span>
+    <!-- Bottom fade to card bg -->
+    <div
+      class="absolute inset-x-0 bottom-0 h-16"
+      style="background: linear-gradient(to top, hsl(var(--card)), transparent);"
+    />
+  </div>
+
+  <!-- Content -->
+  <div class="card-inner flex flex-1 flex-col gap-4 p-6 will-change-transform">
+    <!-- Tags -->
+    <div class="flex flex-wrap gap-1.5">
+      {
+        tags.map((tag) => (
+          <span class="inline-flex items-center rounded-full border border-white/[0.12] px-2.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-widest text-white/50">
+            {tag}
+          </span>
+        ))
+      }
+    </div>
+
+    <!-- Title + excerpt -->
+    <div class="flex-1 space-y-2">
+      <h3 class="text-xl font-bold leading-tight tracking-tight text-foreground">
+        {title}
+      </h3>
+      <p class="text-sm leading-relaxed text-muted-foreground">
+        {excerpt}
+      </p>
+    </div>
+
+    <!-- Devlog link -->
+    {
+      devlogSlug !== null && (
+        <div class="border-t border-white/[0.06] pt-4">
+          <a
+            href={'/blog/' + devlogSlug}
+            class="group/link inline-flex items-center gap-2 text-sm font-medium text-white/60 transition-colors hover:text-white"
+          >
+            View Devlog
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="transition-transform group-hover/link:translate-x-0.5"
+            >
+              <path d="M5 12h14" />
+              <path d="m12 5 7 7-7 7" />
+            </svg>
+          </a>
+        </div>
+      )
+    }
+  </div>
+</article>

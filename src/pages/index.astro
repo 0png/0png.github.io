@@ -1,17 +1,18 @@
 ---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import ProjectsSection from '@/components/ProjectsSection.astro'
+import { projects } from '@/data/projects'
+import { siteConfig } from '@/data/siteConfig'
 
+const featuredProjects = projects
+  .filter((p) => p.featured)
+  .sort((a, b) => a.order - b.order)
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<BaseLayout title={siteConfig.name} description={siteConfig.bio}>
+  <!-- placeholder: Hero (US3) -->
+  <!-- placeholder: About (US3) -->
+  <!-- placeholder: Marquee (US3) -->
+  <ProjectsSection projects={featuredProjects} />
+  <!-- placeholder: Footer (US4) -->
+</BaseLayout>

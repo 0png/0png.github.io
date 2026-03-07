@@ -1,10 +1,13 @@
+// @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 // --- mocks ---
 
-const mockGsapTo = vi.fn()
-const mockGsapFromTo = vi.fn()
-const mockToArrayFn = vi.fn()
+const { mockGsapTo, mockGsapFromTo, mockToArrayFn } = vi.hoisted(() => ({
+  mockGsapTo: vi.fn(),
+  mockGsapFromTo: vi.fn(),
+  mockToArrayFn: vi.fn(),
+}))
 
 vi.mock('gsap', () => ({
   gsap: {

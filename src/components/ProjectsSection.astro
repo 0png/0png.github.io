@@ -1,0 +1,54 @@
+---
+import type { Project } from '@/data/projects'
+import ProjectCard from '@/components/ProjectCard.astro'
+
+interface Props {
+  projects: Project[]
+}
+
+const { projects } = Astro.props
+---
+
+<section
+  id="projects-section"
+  class="relative overflow-hidden"
+  aria-label="Projects"
+>
+  <!-- Section header -->
+  <div class="px-8 pb-8 pt-16 md:px-16">
+    <p class="font-mono text-xs uppercase tracking-[0.3em] text-white/30">
+      Selected work
+    </p>
+    <h2 class="mt-2 text-3xl font-bold tracking-tight text-foreground md:text-4xl">
+      Projects
+    </h2>
+  </div>
+
+  <!-- Scroll track: horizontal on md+, vertical stack on mobile -->
+  <div
+    id="projects-track"
+    class="flex flex-col gap-6 px-8 pb-16 md:flex-row md:flex-nowrap md:items-stretch md:px-16 md:pb-0"
+  >
+    {projects.map((project) => <ProjectCard project={project} />)}
+    <!-- Trailing spacer so last card doesn't sit flush against viewport edge -->
+    <div class="hidden w-8 shrink-0 md:block" aria-hidden="true" />
+  </div>
+</section>
+
+<script>
+  import { initHorizontalScroll } from '@/lib/horizontalScroll'
+  import { ScrollTrigger } from 'gsap/ScrollTrigger'
+
+  function setup() {
+    const section = document.getElementById('projects-section')
+    const track = document.getElementById('projects-track')
+
+    if (section && track && window.innerWidth >= 768) {
+      initHorizontalScroll(section, track)
+    }
+  }
+
+  setup()
+
+  window.addEventListener('resize', () => ScrollTrigger.refresh())
+</script>
