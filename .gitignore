@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# AI tooling
+.agents/
+.claude/
+.specify/
+.mcp.json
+CLAUDE.md
+skills-lock.json
+specs/
+
+# Build output
+dist/
+.astro/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
