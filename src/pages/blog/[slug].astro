@@ -5,17 +5,22 @@ import { getAllDevlogs, getDevlogBySlug, transformNotionPage } from '@/lib/notio
 import type { PageObjectResponse } from '@notionhq/client'
 
 export async function getStaticPaths() {
-  const pages = await getAllDevlogs()
-  return pages
-    .map((page) => {
-      const entry = transformNotionPage(page as PageObjectResponse)
-      if (!entry) return null
-      return {
-        params: { slug: entry.slug },
-        props: { pageId: page.id },
-      }
-    })
-    .filter((p): p is NonNullable<typeof p> => p !== null)
+  try {
+    const pages = await getAllDevlogs()
+    return pages
+      .map((page) => {
+        const entry = transformNotionPage(page as PageObjectResponse)
+        if (!entry) return null
+        return {
+          params: { slug: entry.slug },
+          props: { pageId: page.id },
+        }
+      })
+      .filter((p): p is NonNullable<typeof p> => p !== null)
+  } catch (err) {
+    console.warn('[blog] Notion unavailable — skipping blog route generation:', err)
+    return []
+  }
 }
 
 const { slug } = Astro.params
