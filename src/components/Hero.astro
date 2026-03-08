@@ -1,22 +1,249 @@
 ---
+import { badgeVariants } from '@/components/ui/badge'
+
 interface Props {
   headline: string
 }
 
 const { headline } = Astro.props
+const words = headline.split(' ')
 ---
 
-<section class="relative flex min-h-screen items-center justify-center overflow-hidden px-6">
-  <div class="relative z-10 text-center">
-    <h1
-      class="text-balance text-4xl font-black leading-tight tracking-tighter text-foreground sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl"
-    >
-      {headline}
-    </h1>
-  </div>
-  <!-- Subtle radial glow -->
+<section
+  id="hero"
+  class="relative flex min-h-screen items-center justify-center overflow-hidden px-6"
+>
+  <!-- Animated orbs — primary light sources -->
+  <div class="hero-orb-1 pointer-events-none absolute" aria-hidden="true" />
+  <div class="hero-orb-2 pointer-events-none absolute" aria-hidden="true" />
+  <div class="hero-orb-3 pointer-events-none absolute" aria-hidden="true" />
+
+  <!-- Dot grid -->
+  <div class="hero-dots pointer-events-none absolute inset-0" aria-hidden="true" />
+
+  <!-- Mouse-tracking spotlight -->
+  <div class="hero-spotlight pointer-events-none absolute" aria-hidden="true" />
+
+  <!-- Edge vignettes — burn the grid into the background at all four sides -->
   <div
-    class="pointer-events-none absolute inset-0"
-    style="background: radial-gradient(ellipse 60% 50% at 50% 50%, rgba(255,255,255,0.03) 0%, transparent 70%);"
+    class="pointer-events-none absolute inset-x-0 top-0 h-48"
+    style="background: linear-gradient(to bottom, hsl(var(--background)), transparent);"
+    aria-hidden="true"
   />
+  <div
+    class="pointer-events-none absolute inset-x-0 bottom-0 h-48"
+    style="background: linear-gradient(to top, hsl(var(--background)), transparent);"
+    aria-hidden="true"
+  />
+  <div
+    class="pointer-events-none absolute inset-y-0 left-0 w-48"
+    style="background: linear-gradient(to right, hsl(var(--background)), transparent);"
+    aria-hidden="true"
+  />
+  <div
+    class="pointer-events-none absolute inset-y-0 right-0 w-48"
+    style="background: linear-gradient(to left, hsl(var(--background)), transparent);"
+    aria-hidden="true"
+  />
+
+  <!-- Content -->
+  <div class="relative z-10 flex flex-col items-center gap-8 text-center">
+    <!-- Status badge (shadcn Badge variant) -->
+    <span
+      class={`hero-badge ${badgeVariants({ variant: 'outline' })} gap-2 border-white/[0.12] bg-white/[0.03] px-4 py-1.5 text-white/50 backdrop-blur-sm`}
+    >
+      <span class="relative flex h-2 w-2">
+        <span
+          class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"
+        ></span>
+        <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
+      </span>
+      Available · 2026
+    </span>
+
+    <!-- Headline with per-word clip reveal -->
+    <h1
+      class="text-balance font-black leading-[0.92] tracking-tighter text-foreground"
+      style="font-size: clamp(3rem, 9.5vw, 7.5rem);"
+    >
+      {
+        words.map((word) => (
+          <span class="hero-word-wrap inline-block overflow-hidden pb-[0.1em]">
+            <span class="hero-word inline-block">
+              {word}&nbsp;
+            </span>
+          </span>
+        ))
+      }
+    </h1>
+
+    <!-- Thin rule -->
+    <div class="hero-rule h-px w-20 bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+  </div>
+
+  <!-- Scroll indicator -->
+  <div
+    class="hero-indicator absolute bottom-10 left-1/2 flex -translate-x-1/2 flex-col items-center gap-3"
+    aria-hidden="true"
+  >
+    <span class="font-mono text-[9px] uppercase tracking-[0.3em] text-white/20">scroll</span>
+    <div class="hero-scroll-line h-10 w-px origin-top bg-white/20" />
+  </div>
 </section>
+
+<style>
+  /* ── Orbs ─────────────────────────────────────────────────── */
+  .hero-orb-1 {
+    width: clamp(400px, 65vw, 900px);
+    height: clamp(400px, 65vw, 900px);
+    top: -15%;
+    left: 50%;
+    translate: -50% 0;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle closest-side,
+      rgba(255, 255, 255, 0.13) 0%,
+      rgba(255, 255, 255, 0.04) 45%,
+      transparent 100%
+    );
+    filter: blur(48px);
+    animation: orb-float-1 14s ease-in-out infinite;
+  }
+
+  .hero-orb-2 {
+    width: clamp(260px, 40vw, 560px);
+    height: clamp(260px, 40vw, 560px);
+    bottom: 5%;
+    right: 8%;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle closest-side,
+      rgba(255, 255, 255, 0.09) 0%,
+      transparent 100%
+    );
+    filter: blur(64px);
+    animation: orb-float-2 18s ease-in-out infinite;
+  }
+
+  .hero-orb-3 {
+    width: clamp(200px, 30vw, 400px);
+    height: clamp(200px, 30vw, 400px);
+    top: 30%;
+    left: -5%;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle closest-side,
+      rgba(255, 255, 255, 0.06) 0%,
+      transparent 100%
+    );
+    filter: blur(72px);
+    animation: orb-float-3 20s ease-in-out infinite;
+  }
+
+  @keyframes orb-float-1 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    30%       { transform: translate(28px, -22px) scale(1.05); }
+    65%       { transform: translate(-20px, 16px) scale(0.97); }
+  }
+  @keyframes orb-float-2 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    40%       { transform: translate(-24px, 20px) scale(1.06); }
+    75%       { transform: translate(16px, -12px) scale(0.95); }
+  }
+  @keyframes orb-float-3 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    35%       { transform: translate(18px, 14px) scale(1.04); }
+    70%       { transform: translate(-12px, -18px) scale(0.98); }
+  }
+
+  /* ── Dot grid ─────────────────────────────────────────────── */
+  .hero-dots {
+    background-image: radial-gradient(
+      circle,
+      rgba(255, 255, 255, 0.22) 1px,
+      transparent 1px
+    );
+    background-size: 28px 28px;
+  }
+
+  /* ── Mouse spotlight ──────────────────────────────────────── */
+  .hero-spotlight {
+    width: 800px;
+    height: 800px;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle closest-side,
+      rgba(255, 255, 255, 0.065) 0%,
+      transparent 100%
+    );
+    /* Centered initially; GSAP moves it */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  /* ── Entry animation initial states ──────────────────────── */
+  .hero-badge {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  .hero-word {
+    transform: translateY(110%);
+    opacity: 0;
+  }
+  .hero-rule {
+    opacity: 0;
+    transform: scaleX(0);
+    transform-origin: center;
+  }
+  .hero-indicator {
+    opacity: 0;
+  }
+  .hero-scroll-line {
+    transform: scaleY(0);
+    transform-origin: top;
+  }
+
+  /* ── Reduced motion ───────────────────────────────────────── */
+  @media (prefers-reduced-motion: reduce) {
+    .hero-orb-1, .hero-orb-2, .hero-orb-3 { animation: none; }
+    .hero-badge, .hero-word, .hero-rule,
+    .hero-indicator, .hero-scroll-line {
+      opacity: 1 !important;
+      transform: none !important;
+    }
+  }
+</style>
+
+<script>
+  import gsap from 'gsap'
+
+  const hero = document.getElementById('hero')!
+  const spotlight = hero.querySelector<HTMLElement>('.hero-spotlight')!
+  const badge = hero.querySelector<HTMLElement>('.hero-badge')!
+  const words = hero.querySelectorAll<HTMLElement>('.hero-word')
+  const rule = hero.querySelector<HTMLElement>('.hero-rule')!
+  const indicator = hero.querySelector<HTMLElement>('.hero-indicator')!
+  const scrollLine = hero.querySelector<HTMLElement>('.hero-scroll-line')!
+
+  // Mouse-tracking spotlight
+  hero.addEventListener('mousemove', (e) => {
+    const rect = hero.getBoundingClientRect()
+    gsap.to(spotlight, {
+      left: e.clientX - rect.left,
+      top: e.clientY - rect.top,
+      duration: 0.75,
+      ease: 'power2.out',
+      overwrite: 'auto',
+    })
+  })
+
+  // Entry animation
+  const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
+
+  tl.to(badge, { opacity: 1, y: 0, duration: 0.7, delay: 0.1 })
+    .to(words, { opacity: 1, y: 0, duration: 0.8, stagger: 0.055 }, '-=0.35')
+    .to(rule, { opacity: 1, scaleX: 1, duration: 0.7, ease: 'power2.inOut' }, '-=0.4')
+    .to(indicator, { opacity: 1, duration: 0.5 }, '-=0.3')
+    .to(scrollLine, { scaleY: 1, duration: 1, ease: 'power2.inOut' }, '<')
+</script>
