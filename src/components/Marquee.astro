@@ -6,42 +6,61 @@ interface Props {
   speed?: number
 }
 
-const { items, speed = 30 } = Astro.props
+const { items, speed = 35 } = Astro.props
 ---
 
 <div class="relative overflow-hidden border-y border-white/[0.06] py-5" aria-label="Tech stack">
   <div
-    class="marquee-track flex w-max gap-12"
-    style={`animation: marquee ${speed}s linear infinite;`}
+    class="marquee-track flex"
+    style={`--duration: ${speed}s`}
   >
-    <!-- Primary set -->
-    {
-      items.map((item) => (
-        <span class="flex shrink-0 items-center gap-2 font-mono text-sm font-semibold uppercase tracking-widest text-muted-foreground">
-          {item.name}
-        </span>
-      ))
-    }
-    <!-- Duplicate set for seamless loop -->
-    <span aria-hidden="true" class="contents">
-      {
-        items.map((item) => (
-          <span class="flex shrink-0 items-center gap-2 font-mono text-sm font-semibold uppercase tracking-widest text-muted-foreground">
-            {item.name}
-          </span>
-        ))
-      }
-    </span>
+    <!-- Set 1 -->
+    {items.map((item) => (
+      <span class="marquee-item shrink-0 font-mono text-sm font-semibold uppercase tracking-widest text-muted-foreground">
+        {item.name}
+        <span class="marquee-sep" aria-hidden="true">·</span>
+      </span>
+    ))}
+    <!-- Set 2 — exact clone, aria-hidden so screen readers skip it -->
+    {items.map((item) => (
+      <span class="marquee-item shrink-0 font-mono text-sm font-semibold uppercase tracking-widest text-muted-foreground" aria-hidden="true">
+        {item.name}
+        <span class="marquee-sep" aria-hidden="true">·</span>
+      </span>
+    ))}
   </div>
 </div>
 
 <style>
-  @keyframes marquee {
-    from {
-      transform: translateX(0);
-    }
-    to {
-      transform: translateX(-50%);
+  /*
+   * Each .marquee-item owns its own trailing gap via padding-right.
+   * This means set width = sum of all items incl. their padding,
+   * so -50% == exactly one full set → perfect seamless loop.
+   */
+  .marquee-item {
+    padding-right: 3.5rem; /* 56px — the gap between every item */
+  }
+
+  .marquee-sep {
+    margin-left: 3.5rem;
+    color: rgba(255, 255, 255, 0.15);
+  }
+
+  .marquee-track {
+    width: max-content;
+    will-change: transform;
+    animation: marquee-scroll var(--duration, 35s) linear infinite;
+  }
+
+  @keyframes marquee-scroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .marquee-track {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
     }
   }
 </style>

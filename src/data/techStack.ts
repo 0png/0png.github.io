@@ -11,4 +11,8 @@ export const techStack: TechStackItem[] = [
   { name: 'Three.js', iconSlug: 'threedotjs' },
   { name: 'Tailwind CSS', iconSlug: 'tailwindcss' },
   { name: 'Notion', iconSlug: 'notion' },
+  { name: 'Adobe Premiere Pro', iconSlug: 'adobepremierepro' },
+  { name: 'Adobe After Effects', iconSlug: 'adobeaftereffects' },
+  { name: 'Obsidian', iconSlug: 'obsidian' },
+  { name: 'Python', iconSlug: 'python' },
 ]
