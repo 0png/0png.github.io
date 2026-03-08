@@ -80,3 +80,28 @@ body {
     animation-iteration-count: 1 !important;
   }
 }
+
+/* ── Terminal palette ─────────────────────────────────────────── */
+.terminal-palette {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+/* Custom scrollbar for the terminal output area */
+.term-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.term-scrollbar::-webkit-scrollbar-track {
+  background: #0a0a0a; /* neutral-950 to blend with panel */
+}
+.term-scrollbar::-webkit-scrollbar-thumb {
+  background: #404040; /* neutral-700 */
+  border-radius: 9999px;
+}
+.term-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #737373; /* neutral-500 */
+}
+/* Firefox */
+.term-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #404040 #0a0a0a;
+}
