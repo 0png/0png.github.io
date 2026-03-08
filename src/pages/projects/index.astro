@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro'
 import ProjectCard from '@/components/ProjectCard.astro'
+import Footer from '@/components/Footer.astro'
 import { projects } from '@/data/projects'
 import { siteConfig } from '@/data/siteConfig'
 
@@ -8,15 +9,15 @@ const allProjects = projects.sort((a, b) => a.order - b.order)
 ---
 
 <BaseLayout title={`Projects — ${siteConfig.name}`} description="All projects">
-  <!-- Back link -->
-  <a
-    href="/"
-    class="fixed left-6 top-6 z-50 inline-flex items-center gap-2 rounded-lg border border-white/[0.12] bg-black/60 px-3 py-1.5 font-mono text-xs text-white/50 backdrop-blur-sm transition-colors hover:border-white/30 hover:text-white/80"
-  >
-    <span aria-hidden="true">←</span> ~/home
-  </a>
+  <main class="mx-auto max-w-7xl px-8 pt-28 pb-24 md:px-16">
+    <!-- Breadcrumb back link -->
+    <a
+      href="/"
+      class="inline-flex items-center gap-2 font-mono text-xs text-white/35 hover:text-white/70 transition-colors duration-150 mb-12"
+    >
+      <span aria-hidden="true">←</span> ~/home
+    </a>
 
-  <main class="mx-auto max-w-7xl px-8 py-24 md:px-16">
     <!-- Header -->
     <div class="mb-16">
       <p class="font-mono text-xs uppercase tracking-[0.3em] text-white/30">
@@ -32,4 +33,6 @@ const allProjects = projects.sort((a, b) => a.order - b.order)
       {allProjects.map((project) => <ProjectCard project={project} />)}
     </div>
   </main>
+
+  <Footer githubUrl={siteConfig.githubUrl} year={siteConfig.year} />
 </BaseLayout>

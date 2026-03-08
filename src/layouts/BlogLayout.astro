@@ -1,5 +1,7 @@
 ---
 import BaseLayout from './BaseLayout.astro'
+import Footer from '@/components/Footer.astro'
+import { siteConfig } from '@/data/siteConfig'
 
 interface Props {
   title: string
@@ -108,6 +110,8 @@ const statusLabel: Record<string, string> = {
       <slot />
     </article>
   </main>
+
+  <Footer githubUrl={siteConfig.githubUrl} year={siteConfig.year} />
 </BaseLayout>
 
 <style>
