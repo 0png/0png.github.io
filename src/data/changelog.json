@@ -1,6 +1,12 @@
 [
   {
     "date": "2026-03-08",
+    "subject": "feat: add changelog page, section, component, and CI automation",
+    "body": "- Redesign /changelog as a full-page zigzag timeline (max-w-5xl,\n  glassmorphism cards, fractal noise + purple vignette background,\n  GSAP ScrollTrigger fade-up, colour-coded type badges)\n- Add ChangelogSection.astro to homepage showing 3 latest commits\n  with the same zigzag design, scoped to max-w-5xl\n- Add reusable Changelog.astro component (limit + repoBase props,\n  runtime JSON validation, empty-state fallback)\n- Add scripts/generate-changelog.js (ESM, pure Node built-ins,\n  RS+NUL git log parsing, Co-Authored-By and boilerplate filtering)\n- Add .github/workflows/generate-changelog.yml (push to main,\n  github-actions[bot] loop guard, idempotent diff-before-commit)",
+    "hash": "71191bc"
+  },
+  {
+    "date": "2026-03-08",
     "subject": "feat: add hero terminal trigger button and mobile device notice",
     "body": "Wire up a click-to-open terminal button in the Hero section that dispatches the open-terminal event consumed by TerminalPalette. Add a fixed amber-coloured terminal-log-style banner in BaseLayout that appears on touch/mobile viewports via navigator.maxTouchPoints + window.innerWidth detection.",
     "hash": "6bcd964"
@@ -52,11 +58,5 @@
     "subject": "feat: implement US3 Hero, About, and Marquee components (T034-T037)",
     "body": "Add full-viewport Hero section, bio About section, and CSS-only infinite\nMarquee for the tech stack. Wire all three into index.astro above\nProjectsSection, completing the above-the-fold homepage experience.",
     "hash": "01f2b7b"
-  },
-  {
-    "date": "2026-03-07",
-    "subject": "fix: gracefully handle Notion API failure in getStaticPaths",
-    "body": "Wrap getAllDevlogs() in a try-catch so a missing or invalid\nNOTION_TOKEN produces a warning and an empty blog route list\ninstead of crashing the build.",
-    "hash": "222bb26"
   }
 ]
