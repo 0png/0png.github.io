@@ -1,0 +1,251 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import Footer from '@/components/Footer.astro'
+import { siteConfig } from '@/data/siteConfig'
+import changelog from '@/data/changelog.json'
+
+type Entry = { date: string; subject: string; body: string; hash: string }
+
+// Filter out boilerplate git meta commits
+const SKIP_PREFIXES = ['ci:', 'init:', 'test:']
+const entries = (changelog as Entry[]).filter(
+  (e) => !SKIP_PREFIXES.some((p) => e.subject.toLowerCase().startsWith(p)),
+)
+
+const lastUpdated = entries[0]?.date
+  ? new Date(entries[0].date).toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    })
+  : '—'
+
+const repoBase = `${siteConfig.githubUrl}/${siteConfig.name.toLowerCase()}/commit`
+
+function formatDate(iso: string): string {
+  return new Date(iso).toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  })
+}
+
+function cleanBody(raw: string): string {
+  return raw
+    .split('\n')
+    .filter((line) => !/^co-authored-by:/i.test(line.trim()))
+    .join('\n')
+    .trim()
+}
+
+type TypeMeta = { label: string; cls: string }
+function getType(subject: string): TypeMeta {
+  const s = subject.toLowerCase()
+  if (s.startsWith('feat:'))
+    return { label: 'feat', cls: 'text-emerald-400 border-emerald-400/30 bg-emerald-400/[0.06]' }
+  if (s.startsWith('fix:'))
+    return { label: 'fix', cls: 'text-rose-400 border-rose-400/30 bg-rose-400/[0.06]' }
+  if (s.startsWith('refactor:'))
+    return { label: 'refactor', cls: 'text-sky-400 border-sky-400/30 bg-sky-400/[0.06]' }
+  if (s.startsWith('chore:'))
+    return { label: 'chore', cls: 'text-zinc-400 border-zinc-400/30 bg-zinc-400/[0.06]' }
+  return { label: 'misc', cls: 'text-amber-400 border-amber-400/30 bg-amber-400/[0.06]' }
+}
+
+function stripPrefix(s: string): string {
+  return s.replace(/^[a-z]+:\s*/i, '')
+}
+---
+
+<BaseLayout
+  title={`Changelog — ${siteConfig.name}`}
+  description="A chronological record of notable commits and changes to this project."
+>
+  <!-- ── Atmospheric background ─────────────────────────────────── -->
+  <div class="pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden="true">
+    <!-- Fine fractal noise texture -->
+    <div
+      class="absolute inset-0"
+      style="
+        opacity: 0.035;
+        background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22%3E%3Cfilter id=%22n%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.88%22 numOctaves=%224%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22/%3E%3C/svg%3E');
+        background-size: 200px 200px;
+      "
+    >
+    </div>
+    <!-- Bottom-right deep-purple vignette -->
+    <div
+      class="absolute inset-0"
+      style="background: radial-gradient(ellipse 65% 50% at 100% 100%, rgba(88,28,135,0.13) 0%, transparent 65%);"
+    >
+    </div>
+    <!-- Top-left slate vignette -->
+    <div
+      class="absolute inset-0"
+      style="background: radial-gradient(ellipse 55% 40% at 0% 0%, rgba(15,23,42,0.45) 0%, transparent 60%);"
+    >
+    </div>
+  </div>
+
+  <main class="relative z-10 mx-auto max-w-5xl px-6 pt-28 pb-28 md:px-8">
+    <!-- Breadcrumb -->
+    <a
+      href="/"
+      class="inline-flex items-center gap-2 font-mono text-xs text-white/30 hover:text-amber-400 transition-colors duration-200 mb-14 group"
+    >
+      <span
+        class="inline-block group-hover:-translate-x-1 transition-transform duration-200"
+        aria-hidden="true">←</span
+      >
+      ~/home
+    </a>
+
+    <!-- Page header -->
+    <div class="mb-20">
+      <p class="font-mono text-[11px] uppercase tracking-[0.35em] text-white/20">
+        git log --pretty=format:"%h %s" --no-merges
+      </p>
+      <h1 class="mt-3 text-5xl font-bold tracking-tight text-foreground md:text-6xl">
+        CHANGELOG
+      </h1>
+      <p class="mt-4 font-mono text-xs text-white/30">
+        last updated&nbsp;<span class="text-amber-400">{lastUpdated}</span>
+        <span class="mx-3 text-white/10">·</span>
+        <span>{entries.length} entries</span>
+      </p>
+    </div>
+
+    <!-- ── Zigzag Timeline ─────────────────────────────────────── -->
+    <ol class="relative" aria-label="Changelog timeline">
+      <!-- Vertical spine -->
+      <div
+        class="absolute left-1/2 top-0 bottom-0 w-px -translate-x-px"
+        style="background: linear-gradient(to bottom, transparent 0%, rgba(251,191,36,0.14) 8%, rgba(251,191,36,0.14) 92%, transparent 100%);"
+        aria-hidden="true"
+      >
+      </div>
+
+      {
+        entries.map((entry, i) => {
+          const isLeft = i % 2 === 0
+          const body = cleanBody(entry.body)
+          const type = getType(entry.subject)
+          const title = stripPrefix(entry.subject)
+
+          const card = (
+            <article class="cl-card group relative rounded-sm border border-white/[0.06] bg-neutral-950/55 px-5 py-5 backdrop-blur-sm transition-all duration-300 hover:border-amber-400/[0.16] hover:shadow-[0_0_28px_rgba(251,191,36,0.045)] hover:bg-neutral-950/70">
+              {/* Subtle inner top highlight */}
+              <div
+                class="pointer-events-none absolute inset-x-0 top-0 h-px rounded-t-sm"
+                style="background: linear-gradient(to right, transparent, rgba(255,255,255,0.04), transparent);"
+                aria-hidden="true"
+              />
+
+              {/* Type badge + date */}
+              <div class="flex items-center justify-between gap-3 mb-3">
+                <span
+                  class={`inline-flex items-center rounded-sm border px-2 py-[3px] font-mono text-[10px] font-semibold uppercase tracking-widest ${type.cls}`}
+                >
+                  {type.label}
+                </span>
+                <time datetime={entry.date} class="font-mono text-[11px] text-white/25">
+                  {formatDate(entry.date)}
+                </time>
+              </div>
+
+              {/* Subject */}
+              <h3 class="text-[14px] font-semibold leading-snug text-neutral-100 tracking-[-0.01em]">
+                {title}
+              </h3>
+
+              {/* Body */}
+              {body && (
+                <p class="mt-3 border-t border-white/[0.05] pt-3 text-[12px] leading-relaxed text-neutral-500 whitespace-pre-line font-sans">
+                  {body}
+                </p>
+              )}
+
+              {/* Footer: hash */}
+              <div class="mt-4 flex items-center justify-between border-t border-white/[0.04] pt-3">
+                <span class="font-mono text-[10px] text-white/12 tracking-widest">SHA-1</span>
+                <a
+                  href={`${repoBase}/${entry.hash}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="font-mono text-[11px] text-neutral-600 hover:text-amber-400 transition-colors duration-200"
+                  aria-label={`View commit ${entry.hash} on GitHub`}
+                >
+                  {entry.hash}
+                </a>
+              </div>
+            </article>
+          )
+
+          return (
+            <li
+              class="relative grid grid-cols-[1fr_48px_1fr] items-start pb-14 last:pb-0"
+              data-cl-item
+            >
+              {/* Left slot */}
+              <div class={isLeft ? 'col-start-1 pr-7' : 'col-start-1'}>
+                {isLeft && card}
+              </div>
+
+              {/* Center node */}
+              <div class="col-start-2 relative z-10 flex justify-center pt-[18px]">
+                <div class="relative flex items-center justify-center">
+                  <div
+                    class="absolute h-5 w-5 rounded-full bg-amber-400/[0.08] animate-pulse"
+                    aria-hidden="true"
+                  />
+                  <div class="relative h-[11px] w-[11px] rounded-full border border-amber-400/55 bg-neutral-950 shadow-[0_0_8px_rgba(251,191,36,0.22)]" />
+                </div>
+              </div>
+
+              {/* Right slot */}
+              <div class={!isLeft ? 'col-start-3 pl-7' : 'col-start-3'}>
+                {!isLeft && card}
+              </div>
+            </li>
+          )
+        })
+      }
+    </ol>
+
+    <!-- Genesis marker -->
+    <div class="relative mt-8 flex justify-center" aria-hidden="true">
+      <div class="font-mono text-[11px] text-white/18 border border-white/[0.05] px-5 py-2 tracking-widest">
+        ── GENESIS ──
+      </div>
+    </div>
+  </main>
+
+  <Footer githubUrl={siteConfig.githubUrl} year={siteConfig.year} />
+</BaseLayout>
+
+<script>
+  import gsap from 'gsap'
+  import ScrollTrigger from 'gsap/ScrollTrigger'
+
+  gsap.registerPlugin(ScrollTrigger)
+
+  document.querySelectorAll<HTMLElement>('[data-cl-item]').forEach((item) => {
+    const card = item.querySelector<HTMLElement>('.cl-card')
+    if (!card) return
+
+    gsap.fromTo(
+      card,
+      { autoAlpha: 0, y: 22 },
+      {
+        autoAlpha: 1,
+        y: 0,
+        duration: 0.65,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: item,
+          start: 'top 88%',
+        },
+      },
+    )
+  })
+</script>

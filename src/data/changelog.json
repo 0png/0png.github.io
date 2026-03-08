@@ -1,0 +1,62 @@
+[
+  {
+    "date": "2026-03-08",
+    "subject": "feat: add hero terminal trigger button and mobile device notice",
+    "body": "Wire up a click-to-open terminal button in the Hero section that dispatches the open-terminal event consumed by TerminalPalette. Add a fixed amber-coloured terminal-log-style banner in BaseLayout that appears on touch/mobile viewports via navigator.maxTouchPoints + window.innerWidth detection.",
+    "hash": "6bcd964"
+  },
+  {
+    "date": "2026-03-08",
+    "subject": "feat: add global Terminal Command Palette (Ctrl+K)",
+    "body": "- React island with GSAP fade+slide animation, body scroll lock,\n  and wheel event isolation to prevent Lenis scroll chaining\n- Zsh-style ghost-text autocomplete, Tab completion, and ↑/↓ command history\n- commandMap with 12 commands: help, whoami, cat about_me.txt,\n  cat github.txt, hobby.sh, stack, ls, cd /, cd /about, cd /projects,\n  sudo rm -rf /, clear\n- Custom monospace scrollbar (6px, neutral track, pill thumb)\n- Global Escape + Ctrl/Cmd+K listeners with proper cleanup",
+    "hash": "a558099"
+  },
+  {
+    "date": "2026-03-08",
+    "subject": "feat: add smart sticky navbar and fix projects page layout",
+    "body": "- Add Navbar component with smart hide/show on scroll (rAF-based),\n  glassmorphism backdrop, terminal-style [ LINK ] formatting, pinging\n  status indicator, and GSAP entrance animation\n- Mount Navbar globally via BaseLayout\n- Add [HOME], [ABOUT], [PROJECTS] links; PROJECTS anchors to /#projects\n- Add id=\"projects\" to ProjectsSection for anchor navigation\n- Fix /projects back button z-index conflict by converting from fixed to\n  inline breadcrumb with proper pt offset\n- Add Footer to /projects standalone page and BlogLayout (devlog pages)",
+    "hash": "aa3a3d0"
+  },
+  {
+    "date": "2026-03-08",
+    "subject": "feat: simplify ProjectsSection animation and add back-link to projects page",
+    "body": "- Replace all parallax logic with a simple GSAP fade-up stagger on scroll\n- Clean up ProjectCard: remove cover-parallax classes and will-change-transform\n- Remove unused ScrollTrigger import from ProjectsSection\n- Add fixed terminal-style back link (← ~/home) to /projects/index.astro",
+    "hash": "a4dd05b"
+  },
+  {
+    "date": "2026-03-08",
+    "subject": "feat: implement 6-grid progressive disclosure for ProjectsSection",
+    "body": "- Slice projects to max 6; fill remaining slots with \"Coming Soon\"\n  placeholder cards that mirror exact ProjectCard dimensions\n- Always render \"View All Projects\" terminal-style button linking to /projects\n- Remove fixed horizontal-scroll widths from ProjectCard (w-full for grid)\n- Add /projects/index.astro stub listing all projects in responsive grid\n- Remove src/lib/horizontalScroll.ts and its unit tests",
+    "hash": "f45d423"
+  },
+  {
+    "date": "2026-03-08",
+    "subject": "feat: replace Notion blog with content collections, add projects pages and Footer",
+    "body": "- Migrate blog from Notion API to Astro content collections (projects/)\n- Add project detail pages via src/pages/projects/[slug].astro\n- Add Footer component with tests\n- Remove Notion integration (notion.ts, blog/[slug].astro, related tests)\n- Enhance ProjectCard, ProjectsSection, BlogLayout, and horizontalScroll\n- Update project data in projects.ts and CI workflow",
+    "hash": "c638a09"
+  },
+  {
+    "date": "2026-03-08",
+    "subject": "feat: redesign About section with HUD, terminal, and fix Marquee loop",
+    "body": "- Refactor About.astro into full-viewport section with two-column layout\n- Add macOS-style interactive terminal with typewriter GSAP reveal\n- Add Control Console HUD (real-time HKT clock, geo coords, public IP)\n- Add 40px lit grid background with intersection dots and spotlight orbs\n- Fix Marquee.astro seamless loop using per-item padding-right strategy\n- Add Adobe Premiere Pro, After Effects, Obsidian, Python to tech stack\n- Add avatar card with scanline hover effect and parallax depth lag",
+    "hash": "b0bfcb7"
+  },
+  {
+    "date": "2026-03-08",
+    "subject": "feat: enhance Hero with animated orbs, spotlight, and text reveal",
+    "body": "Add three drifting light orbs, a mouse-tracking GSAP spotlight, a\nmore visible dot grid with four-sided edge vignettes, per-word\nclip-path reveal animation, and a shadcn Badge status indicator.",
+    "hash": "9139c54"
+  },
+  {
+    "date": "2026-03-08",
+    "subject": "feat: implement US3 Hero, About, and Marquee components (T034-T037)",
+    "body": "Add full-viewport Hero section, bio About section, and CSS-only infinite\nMarquee for the tech stack. Wire all three into index.astro above\nProjectsSection, completing the above-the-fold homepage experience.",
+    "hash": "01f2b7b"
+  },
+  {
+    "date": "2026-03-07",
+    "subject": "fix: gracefully handle Notion API failure in getStaticPaths",
+    "body": "Wrap getAllDevlogs() in a try-catch so a missing or invalid\nNOTION_TOKEN produces a warning and an empty blog route list\ninstead of crashing the build.",
+    "hash": "222bb26"
+  }
+]

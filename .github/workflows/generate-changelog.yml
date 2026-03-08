@@ -1,0 +1,54 @@
+name: Generate Changelog
+
+# Runs on every push to main that originates from a human (not our own bot commit).
+# Flow:
+#   1. Human pushes → this workflow generates changelog.json, commits, and pushes.
+#   2. The bot push triggers deploy.yml, which cancels any in-flight first deploy
+#      (concurrency: cancel-in-progress: true) and redeploys with the fresh JSON.
+#   3. The bot push re-triggers this workflow, but the `if` guard below exits early.
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  generate:
+    # Guard: never run on our own auto-commits to prevent an infinite loop.
+    if: github.actor != 'github-actions[bot]'
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write   # required to push the updated JSON back to the repo
+
+    steps:
+      - name: Checkout (full history)
+        uses: actions/checkout@v4
+        with:
+          # fetch-depth: 0 gives git log access to the full commit history.
+          # The default (fetch-depth: 1) would only see the latest commit.
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # The script uses only Node.js built-ins — no npm install needed.
+      - name: Generate changelog.json
+        run: node scripts/generate-changelog.js
+
+      - name: Commit and push if JSON changed
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Only commit if the file actually changed — idempotent guard.
+          # `git diff --quiet` exits 0 (no diff) or 1 (diff found).
+          if ! git diff --quiet src/data/changelog.json; then
+            git add src/data/changelog.json
+            git commit -m "chore: update changelog.json"
+            git push
+          else
+            echo "changelog.json unchanged — nothing to commit."
+          fi
