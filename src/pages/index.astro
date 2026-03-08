@@ -4,6 +4,7 @@ import Hero from '@/components/Hero.astro'
 import About from '@/components/About.astro'
 import Marquee from '@/components/Marquee.astro'
 import ProjectsSection from '@/components/ProjectsSection.astro'
+import Footer from '@/components/Footer.astro'
 import { projects } from '@/data/projects'
 import { siteConfig } from '@/data/siteConfig'
 import { techStack } from '@/data/techStack'
@@ -18,5 +19,5 @@ const featuredProjects = projects
   <About bio={siteConfig.bio} />
   <Marquee items={techStack} />
   <ProjectsSection projects={featuredProjects} />
-  <!-- placeholder: Footer (US4) -->
+  <Footer githubUrl={siteConfig.githubUrl} year={siteConfig.year} />
 </BaseLayout>

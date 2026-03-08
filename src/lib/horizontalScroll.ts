@@ -4,23 +4,24 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 gsap.registerPlugin(ScrollTrigger)
 
 export function initHorizontalScroll(sectionEl: Element, trackEl: Element): void {
-  const totalScrollWidth = (trackEl as HTMLElement).scrollWidth - window.innerWidth
+  const getScrollDistance = () =>
+    (trackEl as HTMLElement).offsetWidth - (sectionEl as HTMLElement).offsetWidth
 
   const tween = gsap.to(trackEl, {
-    x: -totalScrollWidth,
+    x: () => -getScrollDistance(),
     ease: 'none',
     scrollTrigger: {
       trigger: sectionEl,
       pin: true,
       scrub: 1,
-      end: () => `+=${totalScrollWidth}`,
+      end: () => `+=${getScrollDistance()}`,
       invalidateOnRefresh: true,
     },
   })
 
   const cards = gsap.utils.toArray<HTMLElement>('.project-card', trackEl)
   cards.forEach((card) => {
-    const inner = card.querySelector('.card-inner')
+    const inner = card.querySelector<HTMLElement>('.card-inner')
     if (!inner) return
     gsap.fromTo(
       inner,

@@ -30,38 +30,36 @@ vi.mock('gsap/ScrollTrigger', () => ({
 
 import { initHorizontalScroll } from '@/lib/horizontalScroll'
 
-function makeFakeTrack(scrollWidth: number, cardCount = 2) {
+function makeFakeTrack(offsetWidth: number, cardCount = 2) {
   const cards = Array.from({ length: cardCount }, (_, i) => ({
     querySelector: vi.fn(() => ({ dataset: {} })),
     dataset: { index: String(i) },
   }))
 
   const track = {
-    scrollWidth,
+    offsetWidth,
     querySelectorAll: vi.fn(() => cards),
   } as unknown as Element
 
   return { track, cards }
 }
 
-function makeFakeSection() {
-  return document.createElement('div') as unknown as Element
+function makeFakeSection(offsetWidth = 1024) {
+  const el = document.createElement('div')
+  Object.defineProperty(el, 'offsetWidth', { value: offsetWidth })
+  return el as unknown as Element
 }
 
 describe('initHorizontalScroll', () => {
-  const fakeInnerWidth = 1024
+  const sectionWidth = 1024
 
   beforeEach(() => {
     vi.clearAllMocks()
-    Object.defineProperty(window, 'innerWidth', {
-      value: fakeInnerWidth,
-      writable: true,
-    })
   })
 
   it('calls gsap.to on the track element', () => {
     const { track, cards } = makeFakeTrack(3072)
-    const section = makeFakeSection()
+    const section = makeFakeSection(sectionWidth)
     mockToArrayFn.mockReturnValue(cards)
     mockGsapTo.mockReturnValue({ scrollTrigger: {} })
 
@@ -71,23 +69,25 @@ describe('initHorizontalScroll', () => {
     expect(mockGsapTo).toHaveBeenCalledWith(track, expect.any(Object))
   })
 
-  it('tweens x to -(scrollWidth - innerWidth)', () => {
-    const scrollWidth = 3072
-    const expectedX = -(scrollWidth - fakeInnerWidth)
-    const { track, cards } = makeFakeTrack(scrollWidth)
-    const section = makeFakeSection()
+  it('tweens x to -(trackOffsetWidth - sectionOffsetWidth)', () => {
+    const trackWidth = 3072
+    const expectedX = -(trackWidth - sectionWidth)
+    const { track, cards } = makeFakeTrack(trackWidth)
+    const section = makeFakeSection(sectionWidth)
     mockToArrayFn.mockReturnValue(cards)
     mockGsapTo.mockReturnValue({ scrollTrigger: {} })
 
     initHorizontalScroll(section, track)
 
     const callArgs = mockGsapTo.mock.calls[0][1] as Record<string, unknown>
-    expect(callArgs.x).toBe(expectedX)
+    // x is a function so GSAP can recalculate on invalidateOnRefresh
+    const xValue = typeof callArgs.x === 'function' ? (callArgs.x as () => number)() : callArgs.x
+    expect(xValue).toBe(expectedX)
   })
 
   it('passes pin: true to the ScrollTrigger config', () => {
     const { track, cards } = makeFakeTrack(3072)
-    const section = makeFakeSection()
+    const section = makeFakeSection(sectionWidth)
     mockToArrayFn.mockReturnValue(cards)
     mockGsapTo.mockReturnValue({ scrollTrigger: {} })
 
@@ -100,7 +100,7 @@ describe('initHorizontalScroll', () => {
 
   it('passes scrub: 1 to the ScrollTrigger config', () => {
     const { track, cards } = makeFakeTrack(3072)
-    const section = makeFakeSection()
+    const section = makeFakeSection(sectionWidth)
     mockToArrayFn.mockReturnValue(cards)
     mockGsapTo.mockReturnValue({ scrollTrigger: {} })
 
@@ -113,7 +113,7 @@ describe('initHorizontalScroll', () => {
 
   it('passes invalidateOnRefresh: true to the ScrollTrigger config', () => {
     const { track, cards } = makeFakeTrack(3072)
-    const section = makeFakeSection()
+    const section = makeFakeSection(sectionWidth)
     mockToArrayFn.mockReturnValue(cards)
     mockGsapTo.mockReturnValue({ scrollTrigger: {} })
 

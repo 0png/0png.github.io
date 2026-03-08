@@ -24,14 +24,15 @@ const { projects } = Astro.props
     </h2>
   </div>
 
-  <!-- Scroll track: horizontal on md+, vertical stack on mobile -->
+  <!-- Scroll track: w-max gives the flex row its natural full width so
+       offsetWidth = total cards width, which GSAP reads correctly -->
   <div
     id="projects-track"
-    class="flex flex-col gap-6 px-8 pb-16 md:flex-row md:flex-nowrap md:items-stretch md:px-16 md:pb-0"
+    class="flex flex-col gap-6 px-8 pb-16 md:w-max md:flex-row md:flex-nowrap md:items-stretch md:px-16 md:pb-0"
   >
     {projects.map((project) => <ProjectCard project={project} />)}
     <!-- Trailing spacer so last card doesn't sit flush against viewport edge -->
-    <div class="hidden w-8 shrink-0 md:block" aria-hidden="true" />
+    <div class="hidden w-16 shrink-0 md:block" aria-hidden="true" />
   </div>
 </section>
 
@@ -39,16 +40,23 @@ const { projects } = Astro.props
   import { initHorizontalScroll } from '@/lib/horizontalScroll'
   import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
-  function setup() {
-    const section = document.getElementById('projects-section')
-    const track = document.getElementById('projects-track')
+  const section = document.getElementById('projects-section')
+  const track = document.getElementById('projects-track')
 
-    if (section && track && window.innerWidth >= 768) {
-      initHorizontalScroll(section, track)
-    }
+  if (section && track) {
+    // Defer setup until the browser has finished painting so offsetWidth
+    // reflects the real laid-out dimensions, not a mid-parse snapshot.
+    requestAnimationFrame(() => {
+      if (window.innerWidth >= 768) {
+        initHorizontalScroll(section, track)
+      }
+
+      // ResizeObserver fires only when the section's dimensions actually
+      // change — more efficient and accurate than window 'resize'.
+      const ro = new ResizeObserver(() => {
+        ScrollTrigger.refresh()
+      })
+      ro.observe(section)
+    })
   }
-
-  setup()
-
-  window.addEventListener('resize', () => ScrollTrigger.refresh())
 </script>
