@@ -25,7 +25,7 @@ const placeholderCount = Math.max(0, MAX - displayed.length)
   </div>
 
   <!-- 6-slot grid -->
-  <div class="grid grid-cols-1 gap-6 px-8 pb-8 md:grid-cols-2 md:px-16 lg:grid-cols-3">
+  <div id="projects-grid" class="grid grid-cols-1 gap-6 px-8 pb-8 md:grid-cols-2 md:px-16 lg:grid-cols-3">
     {displayed.map((project) => <ProjectCard project={project} />)}
 
     {
@@ -98,3 +98,26 @@ const placeholderCount = Math.max(0, MAX - displayed.length)
     </a>
   </div>
 </section>
+
+<script>
+  import gsap from 'gsap'
+
+  const grid = document.getElementById('projects-grid')
+  if (grid) {
+    gsap.fromTo(
+      Array.from(grid.children),
+      { opacity: 0, y: 40 },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 0.6,
+        ease: 'power2.out',
+        stagger: 0.1,
+        scrollTrigger: {
+          trigger: grid,
+          start: 'top 80%',
+        },
+      },
+    )
+  }
+</script>
