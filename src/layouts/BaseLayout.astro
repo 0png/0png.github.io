@@ -20,14 +20,52 @@ const { title, description } = Astro.props
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
+    <style>
+      #mobile-notice {
+        position: fixed;
+        bottom: 1rem;
+        left: 50%;
+        translate: -50% 0;
+        z-index: 9999;
+        font-family: ui-monospace, 'Cascadia Code', 'Fira Code', monospace;
+        font-size: 0.75rem;
+        line-height: 1.4;
+        color: rgb(251 191 36); /* amber-400 */
+        background: rgba(0, 0, 0, 0.72);
+        border: 1px solid rgba(251, 191, 36, 0.25);
+        border-radius: 4px;
+        padding: 0.45rem 0.85rem;
+        white-space: nowrap;
+        backdrop-filter: blur(6px);
+        pointer-events: none;
+      }
+      .mobile-notice-prefix {
+        color: rgb(251 191 36 / 60%);
+        margin-right: 0.35em;
+      }
+    </style>
   </head>
   <body>
+    <!-- Mobile notice — hidden by default, revealed by JS on touch devices -->
+    <div id="mobile-notice" aria-live="polite" hidden>
+      <span class="mobile-notice-prefix">[&nbsp;NOTICE&nbsp;]:</span>
+      For the best CLI experience, please use a desktop browser.
+    </div>
+
     <Navbar />
     <slot />
     <TerminalPalette client:load />
     <script>
       import { initScroll } from '@/lib/scroll'
       initScroll()
+    </script>
+    <script>
+      const isMobile =
+        navigator.maxTouchPoints > 0 && window.innerWidth < 1024
+      if (isMobile) {
+        const el = document.getElementById('mobile-notice')
+        if (el) el.hidden = false
+      }
     </script>
   </body>
 </html>

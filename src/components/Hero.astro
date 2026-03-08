@@ -79,6 +79,15 @@ const words = headline.split(' ')
 
     <!-- Thin rule -->
     <div class="hero-rule h-px w-20 bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+
+    <!-- Terminal command palette trigger -->
+    <button
+      id="hero-terminal-trigger"
+      class="hero-trigger font-mono"
+      aria-label="Open terminal command palette (Ctrl+K)"
+    >
+      <span class="text-white/40">&gt; press </span><span class="text-white/65">[Ctrl + K]</span><span class="text-white/40"> to launch terminal</span><span class="hero-cursor text-white/50">_</span>
+    </button>
   </div>
 
   <!-- Scroll indicator -->
@@ -196,6 +205,33 @@ const words = headline.split(' ')
     transform: scaleX(0);
     transform-origin: center;
   }
+  .hero-trigger {
+    opacity: 0;
+    transform: translateY(10px);
+    padding: 0.55rem 1.25rem;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.45);
+    font-size: 0.8125rem;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+    transition: box-shadow 0.25s ease, border-color 0.25s ease;
+    backdrop-filter: blur(6px);
+  }
+  .hero-trigger:hover {
+    border-color: rgba(255, 255, 255, 0.18);
+    box-shadow:
+      0 0 20px rgba(255, 255, 255, 0.07),
+      0 0 40px rgba(255, 255, 255, 0.03),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+  }
+  .hero-cursor {
+    animation: cursor-blink 1.1s step-end infinite;
+  }
+  @keyframes cursor-blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0; }
+  }
   .hero-indicator {
     opacity: 0;
   }
@@ -208,10 +244,11 @@ const words = headline.split(' ')
   @media (prefers-reduced-motion: reduce) {
     .hero-orb-1, .hero-orb-2, .hero-orb-3 { animation: none; }
     .hero-badge, .hero-word, .hero-rule,
-    .hero-indicator, .hero-scroll-line {
+    .hero-trigger, .hero-indicator, .hero-scroll-line {
       opacity: 1 !important;
       transform: none !important;
     }
+    .hero-cursor { animation: none; }
   }
 </style>
 
@@ -223,6 +260,7 @@ const words = headline.split(' ')
   const badge = hero.querySelector<HTMLElement>('.hero-badge')!
   const words = hero.querySelectorAll<HTMLElement>('.hero-word')
   const rule = hero.querySelector<HTMLElement>('.hero-rule')!
+  const trigger = hero.querySelector<HTMLElement>('.hero-trigger')!
   const indicator = hero.querySelector<HTMLElement>('.hero-indicator')!
   const scrollLine = hero.querySelector<HTMLElement>('.hero-scroll-line')!
 
@@ -238,12 +276,18 @@ const words = headline.split(' ')
     })
   })
 
+  // Terminal trigger click → dispatch shared event
+  trigger.addEventListener('click', () => {
+    window.dispatchEvent(new Event('open-terminal'))
+  })
+
   // Entry animation
   const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
 
   tl.to(badge, { opacity: 1, y: 0, duration: 0.7, delay: 0.1 })
     .to(words, { opacity: 1, y: 0, duration: 0.8, stagger: 0.055 }, '-=0.35')
     .to(rule, { opacity: 1, scaleX: 1, duration: 0.7, ease: 'power2.inOut' }, '-=0.4')
+    .to(trigger, { opacity: 1, y: 0, duration: 0.55 }, '-=0.3')
     .to(indicator, { opacity: 1, duration: 0.5 }, '-=0.3')
     .to(scrollLine, { scaleY: 1, duration: 1, ease: 'power2.inOut' }, '<')
 </script>

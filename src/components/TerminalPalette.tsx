@@ -190,6 +190,13 @@ export default function TerminalPalette() {
     outputRef.current?.scrollTo({ top: outputRef.current.scrollHeight, behavior: 'smooth' })
   }, [lines])
 
+  // ── External open trigger (dispatched by Hero button) ────────
+  useEffect(() => {
+    const handler = () => openPalette()
+    window.addEventListener('open-terminal', handler)
+    return () => window.removeEventListener('open-terminal', handler)
+  }, [openPalette])
+
   // ── Global Ctrl+K / Cmd+K ────────────────────────────────────
   useEffect(() => {
     const handler = (e: globalThis.KeyboardEvent) => {
