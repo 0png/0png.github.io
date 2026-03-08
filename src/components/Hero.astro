@@ -1,0 +1,22 @@
+---
+interface Props {
+  headline: string
+}
+
+const { headline } = Astro.props
+---
+
+<section class="relative flex min-h-screen items-center justify-center overflow-hidden px-6">
+  <div class="relative z-10 text-center">
+    <h1
+      class="text-balance text-4xl font-black leading-tight tracking-tighter text-foreground sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl"
+    >
+      {headline}
+    </h1>
+  </div>
+  <!-- Subtle radial glow -->
+  <div
+    class="pointer-events-none absolute inset-0"
+    style="background: radial-gradient(ellipse 60% 50% at 50% 50%, rgba(255,255,255,0.03) 0%, transparent 70%);"
+  />
+</section>

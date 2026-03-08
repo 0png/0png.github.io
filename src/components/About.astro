@@ -1,0 +1,17 @@
+---
+interface Props {
+  bio: string
+}
+
+const { bio } = Astro.props
+---
+
+<section class="flex min-h-[50vh] items-center justify-center px-6 py-24">
+  <div class="mx-auto max-w-2xl text-center">
+    <p
+      class="text-lg leading-relaxed text-muted-foreground sm:text-xl md:text-2xl"
+    >
+      {bio}
+    </p>
+  </div>
+</section>

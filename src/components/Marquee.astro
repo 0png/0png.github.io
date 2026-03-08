@@ -1,0 +1,47 @@
+---
+import type { TechStackItem } from '@/data/techStack'
+
+interface Props {
+  items: TechStackItem[]
+  speed?: number
+}
+
+const { items, speed = 30 } = Astro.props
+---
+
+<div class="relative overflow-hidden border-y border-white/[0.06] py-5" aria-label="Tech stack">
+  <div
+    class="marquee-track flex w-max gap-12"
+    style={`animation: marquee ${speed}s linear infinite;`}
+  >
+    <!-- Primary set -->
+    {
+      items.map((item) => (
+        <span class="flex shrink-0 items-center gap-2 font-mono text-sm font-semibold uppercase tracking-widest text-muted-foreground">
+          {item.name}
+        </span>
+      ))
+    }
+    <!-- Duplicate set for seamless loop -->
+    <span aria-hidden="true" class="contents">
+      {
+        items.map((item) => (
+          <span class="flex shrink-0 items-center gap-2 font-mono text-sm font-semibold uppercase tracking-widest text-muted-foreground">
+            {item.name}
+          </span>
+        ))
+      }
+    </span>
+  </div>
+</div>
+
+<style>
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+</style>

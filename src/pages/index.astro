@@ -1,8 +1,12 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro'
+import Hero from '@/components/Hero.astro'
+import About from '@/components/About.astro'
+import Marquee from '@/components/Marquee.astro'
 import ProjectsSection from '@/components/ProjectsSection.astro'
 import { projects } from '@/data/projects'
 import { siteConfig } from '@/data/siteConfig'
+import { techStack } from '@/data/techStack'
 
 const featuredProjects = projects
   .filter((p) => p.featured)
@@ -10,9 +14,9 @@ const featuredProjects = projects
 ---
 
 <BaseLayout title={siteConfig.name} description={siteConfig.bio}>
-  <!-- placeholder: Hero (US3) -->
-  <!-- placeholder: About (US3) -->
-  <!-- placeholder: Marquee (US3) -->
+  <Hero headline={siteConfig.headline} />
+  <About bio={siteConfig.bio} />
+  <Marquee items={techStack} />
   <ProjectsSection projects={featuredProjects} />
   <!-- placeholder: Footer (US4) -->
 </BaseLayout>
