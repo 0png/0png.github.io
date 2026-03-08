@@ -27,6 +27,7 @@ const COMMAND_KEYS = [
   'cd /',
   'cd /about',
   'cd /projects',
+  'cd /changelog',
   'sudo rm -rf /',
   'clear',
 ] as const
@@ -47,6 +48,7 @@ const commandMap: Record<string, () => CommandResult> = {
       mkLine('out', '  cd /                       →  Navigate to Home'),
       mkLine('out', '  cd /about                  →  Navigate to About section'),
       mkLine('out', '  cd /projects               →  Navigate to Projects page'),
+      mkLine('out', '  cd /changelog              →  Navigate to Changelog section'),
       mkLine('out', "  sudo rm -rf /              →  ...please don't"),
       mkLine('out', '  clear                      →  Clear terminal output'),
     ],
@@ -86,9 +88,10 @@ const commandMap: Record<string, () => CommandResult> = {
   ls: () => ({
     lines: [
       mkLine('info', 'Pages:'),
-      mkLine('out', '  /          →  Home'),
-      mkLine('out', '  /about     →  About section'),
-      mkLine('out', '  /projects  →  Projects listing'),
+      mkLine('out', '  /           →  Home'),
+      mkLine('out', '  /about      →  About section'),
+      mkLine('out', '  /projects   →  Projects listing'),
+      mkLine('out', '  /changelog  →  Changelog section'),
     ],
   }),
 
@@ -105,6 +108,11 @@ const commandMap: Record<string, () => CommandResult> = {
   'cd /projects': () => ({
     lines: [mkLine('info', 'Navigating to /projects…')],
     href: '/projects',
+  }),
+
+  'cd /changelog': () => ({
+    lines: [mkLine('info', 'Navigating to /#changelog…')],
+    href: '/#changelog',
   }),
 
   'cat github.txt': () => ({
