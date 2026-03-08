@@ -1,0 +1,27 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import ProjectCard from '@/components/ProjectCard.astro'
+import { projects } from '@/data/projects'
+import { siteConfig } from '@/data/siteConfig'
+
+const allProjects = projects.sort((a, b) => a.order - b.order)
+---
+
+<BaseLayout title={`Projects — ${siteConfig.name}`} description="All projects">
+  <main class="mx-auto max-w-7xl px-8 py-24 md:px-16">
+    <!-- Header -->
+    <div class="mb-16">
+      <p class="font-mono text-xs uppercase tracking-[0.3em] text-white/30">
+        All work
+      </p>
+      <h1 class="mt-2 text-4xl font-bold tracking-tight text-foreground md:text-5xl">
+        Projects
+      </h1>
+    </div>
+
+    <!-- Full grid -->
+    <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {allProjects.map((project) => <ProjectCard project={project} />)}
+    </div>
+  </main>
+</BaseLayout>

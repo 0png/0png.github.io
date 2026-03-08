@@ -7,13 +7,13 @@ interface Props {
 }
 
 const { projects } = Astro.props
+
+const MAX = 6
+const displayed = projects.slice(0, MAX)
+const placeholderCount = Math.max(0, MAX - displayed.length)
 ---
 
-<section
-  id="projects-section"
-  class="relative overflow-hidden"
-  aria-label="Projects"
->
+<section class="relative" aria-label="Projects">
   <!-- Section header -->
   <div class="px-8 pb-8 pt-16 md:px-16">
     <p class="font-mono text-xs uppercase tracking-[0.3em] text-white/30">
@@ -24,39 +24,77 @@ const { projects } = Astro.props
     </h2>
   </div>
 
-  <!-- Scroll track: w-max gives the flex row its natural full width so
-       offsetWidth = total cards width, which GSAP reads correctly -->
-  <div
-    id="projects-track"
-    class="flex flex-col gap-6 px-8 pb-16 md:w-max md:flex-row md:flex-nowrap md:items-stretch md:px-16 md:pb-0"
-  >
-    {projects.map((project) => <ProjectCard project={project} />)}
-    <!-- Trailing spacer so last card doesn't sit flush against viewport edge -->
-    <div class="hidden w-16 shrink-0 md:block" aria-hidden="true" />
+  <!-- 6-slot grid -->
+  <div class="grid grid-cols-1 gap-6 px-8 pb-8 md:grid-cols-2 md:px-16 lg:grid-cols-3">
+    {displayed.map((project) => <ProjectCard project={project} />)}
+
+    {
+      Array.from({ length: placeholderCount }).map((_, i) => (
+        <div
+          aria-hidden="true"
+          class="flex w-full flex-col overflow-hidden rounded-2xl border border-dashed border-white/[0.08] bg-card"
+        >
+          <!-- Mirror the cover area height -->
+          <div class="relative h-52 overflow-hidden">
+            <div
+              class="absolute inset-0"
+              style="background: radial-gradient(ellipse 80% 60% at 30% 40%, rgba(255,255,255,0.02) 0%, transparent 70%);"
+            />
+            <!-- Ghost slot number -->
+            <span
+              class="pointer-events-none absolute bottom-3 right-4 select-none font-mono font-black leading-none tracking-tighter text-white/[0.04]"
+              style="font-size: clamp(5rem, 10vw, 7rem);"
+            >
+              {String(displayed.length + i + 1).padStart(2, '0')}
+            </span>
+            <div
+              class="absolute inset-x-0 bottom-0 h-16"
+              style="background: linear-gradient(to top, hsl(var(--card)), transparent);"
+            />
+          </div>
+
+          <!-- Mirror the content area -->
+          <div class="flex flex-1 flex-col gap-4 p-6">
+            <div class="flex flex-wrap gap-1.5">
+              <span class="inline-flex items-center rounded-full border border-white/[0.06] px-2.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-widest text-white/20">
+                coming soon
+              </span>
+            </div>
+            <div class="flex-1 space-y-2">
+              <p class="font-mono text-sm text-white/20">_______________________</p>
+              <p class="font-mono text-xs leading-relaxed text-white/15">
+                $ next project loading...
+              </p>
+            </div>
+          </div>
+        </div>
+      ))
+    }
+  </div>
+
+  <!-- "View All" button -->
+  <div class="px-8 pb-16 md:px-16">
+    <a
+      href="/projects"
+      class="flex w-full items-center justify-center gap-3 rounded-xl border border-neutral-700 bg-transparent px-6 py-4 font-mono text-sm text-white/50 transition-colors hover:border-neutral-500 hover:text-white/80"
+    >
+      <span class="text-white/30">$</span>
+      View All Projects
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="14"
+        height="14"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M5 12h14" />
+        <path d="m12 5 7 7-7 7" />
+      </svg>
+    </a>
   </div>
 </section>
-
-<script>
-  import { initHorizontalScroll } from '@/lib/horizontalScroll'
-  import { ScrollTrigger } from 'gsap/ScrollTrigger'
-
-  const section = document.getElementById('projects-section')
-  const track = document.getElementById('projects-track')
-
-  if (section && track) {
-    // Defer setup until the browser has finished painting so offsetWidth
-    // reflects the real laid-out dimensions, not a mid-parse snapshot.
-    requestAnimationFrame(() => {
-      if (window.innerWidth >= 768) {
-        initHorizontalScroll(section, track)
-      }
-
-      // ResizeObserver fires only when the section's dimensions actually
-      // change — more efficient and accurate than window 'resize'.
-      const ro = new ResizeObserver(() => {
-        ScrollTrigger.refresh()
-      })
-      ro.observe(section)
-    })
-  }
-</script>
