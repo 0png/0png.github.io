@@ -1,6 +1,12 @@
 [
   {
     "date": "2026-03-10",
+    "subject": "feat: add parallax layers, typewriter trigger, mobile notice, and OG meta",
+    "body": "- Hero: multi-layer scroll parallax on orbs/dots/content, 3D tilt on mousemove, typewriter loop on terminal trigger\n- About/Changelog/Contact: per-section background parallax at varying scrub depths\n- ProjectCard: tighten hover transition, add bg tint on hover\n- BaseLayout: closable mobile notice (all-device for testing), OG/Twitter meta tags\n- scroll.ts: expose lenis instance on window for cross-component access",
+    "hash": "33a546f"
+  },
+  {
+    "date": "2026-03-10",
     "subject": "feat: add cd /contact command and functional terminal traffic light buttons",
     "body": "- Add `cd /contact` command to terminal (registry, commandMap, help, ls)\n- Replace static dot divs with functional buttons in TerminalPalette\n- Red closes, yellow clears output, green toggles maximize (max-w-2xl ↔ max-w-5xl)\n- Hover over dot group reveals macOS-style SVG icons (×, −, diagonal arrows)\n- Fix ChangelogSection mobile layout: left-aligned spine, single-column card grid, read-more truncation",
     "hash": "434a994"
@@ -52,11 +58,5 @@
     "subject": "feat: implement 6-grid progressive disclosure for ProjectsSection",
     "body": "- Slice projects to max 6; fill remaining slots with \"Coming Soon\"\n  placeholder cards that mirror exact ProjectCard dimensions\n- Always render \"View All Projects\" terminal-style button linking to /projects\n- Remove fixed horizontal-scroll widths from ProjectCard (w-full for grid)\n- Add /projects/index.astro stub listing all projects in responsive grid\n- Remove src/lib/horizontalScroll.ts and its unit tests",
     "hash": "f45d423"
-  },
-  {
-    "date": "2026-03-08",
-    "subject": "feat: replace Notion blog with content collections, add projects pages and Footer",
-    "body": "- Migrate blog from Notion API to Astro content collections (projects/)\n- Add project detail pages via src/pages/projects/[slug].astro\n- Add Footer component with tests\n- Remove Notion integration (notion.ts, blog/[slug].astro, related tests)\n- Enhance ProjectCard, ProjectsSection, BlogLayout, and horizontalScroll\n- Update project data in projects.ts and CI workflow",
-    "hash": "c638a09"
   }
 ]
