@@ -28,6 +28,7 @@ const COMMAND_KEYS = [
   'cd /about',
   'cd /projects',
   'cd /changelog',
+  'cd /contact',
   'sudo rm -rf /',
   'clear',
 ] as const
@@ -49,6 +50,7 @@ const commandMap: Record<string, () => CommandResult> = {
       mkLine('out', '  cd /about                  →  Navigate to About section'),
       mkLine('out', '  cd /projects               →  Navigate to Projects page'),
       mkLine('out', '  cd /changelog              →  Navigate to Changelog section'),
+      mkLine('out', '  cd /contact                →  Navigate to Contact section'),
       mkLine('out', "  sudo rm -rf /              →  ...please don't"),
       mkLine('out', '  clear                      →  Clear terminal output'),
     ],
@@ -92,6 +94,7 @@ const commandMap: Record<string, () => CommandResult> = {
       mkLine('out', '  /about      →  About section'),
       mkLine('out', '  /projects   →  Projects listing'),
       mkLine('out', '  /changelog  →  Changelog section'),
+      mkLine('out', '  /contact    →  Contact section'),
     ],
   }),
 
@@ -113,6 +116,11 @@ const commandMap: Record<string, () => CommandResult> = {
   'cd /changelog': () => ({
     lines: [mkLine('info', 'Navigating to /#changelog…')],
     href: '/#changelog',
+  }),
+
+  'cd /contact': () => ({
+    lines: [mkLine('info', 'Navigating to /#contact…')],
+    href: '/#contact',
   }),
 
   'cat github.txt': () => ({
@@ -138,6 +146,8 @@ export default function TerminalPalette() {
   const [lines, setLines] = useState<Line[]>([])
   const [history, setHistory] = useState<string[]>([])
   const [historyIdx, setHistoryIdx] = useState(-1)
+  const [isMaximized, setIsMaximized] = useState(false)
+  const [dotHover, setDotHover] = useState(false)
 
   const overlayRef = useRef<HTMLDivElement>(null)
   const modalRef = useRef<HTMLDivElement>(null)
@@ -314,16 +324,70 @@ export default function TerminalPalette() {
     >
       <div
         ref={modalRef}
-        className="terminal-palette mx-4 w-full max-w-2xl overflow-hidden rounded-lg border border-white/10 bg-neutral-950 shadow-2xl"
+        className={`terminal-palette mx-4 w-full overflow-hidden rounded-lg border border-white/10 bg-neutral-950 shadow-2xl transition-[max-width] duration-300 ${isMaximized ? 'max-w-5xl' : 'max-w-2xl'}`}
         onClick={(e) => e.stopPropagation()}
         onWheel={(e) => e.stopPropagation()}
       >
         {/* ── Window chrome ── */}
         <div className="flex items-center gap-2 border-b border-white/[0.07] bg-black/80 px-4 py-3">
-          <div className="flex gap-1.5">
-            <div className="h-3 w-3 rounded-full bg-[#ff5f57]" />
-            <div className="h-3 w-3 rounded-full bg-[#febc2e]" />
-            <div className="h-3 w-3 rounded-full bg-[#28c840]" />
+          <div
+            className="flex gap-1.5"
+            onMouseEnter={() => setDotHover(true)}
+            onMouseLeave={() => setDotHover(false)}
+          >
+            {/* Red — close */}
+            <button
+              onClick={closePalette}
+              className="flex h-3 w-3 items-center justify-center rounded-full bg-[#ff5f57] transition-opacity hover:opacity-90"
+              aria-label="Close terminal"
+            >
+              {dotHover && (
+                <svg width="6" height="6" viewBox="0 0 6 6" fill="none">
+                  <line x1="1" y1="1" x2="5" y2="5" stroke="#4d0000" strokeWidth="1.2" strokeLinecap="round" />
+                  <line x1="5" y1="1" x2="1" y2="5" stroke="#4d0000" strokeWidth="1.2" strokeLinecap="round" />
+                </svg>
+              )}
+            </button>
+
+            {/* Yellow — clear output */}
+            <button
+              onClick={() => setLines([])}
+              className="flex h-3 w-3 items-center justify-center rounded-full bg-[#febc2e] transition-opacity hover:opacity-90"
+              aria-label="Clear terminal output"
+            >
+              {dotHover && (
+                <svg width="6" height="6" viewBox="0 0 6 6" fill="none">
+                  <line x1="1" y1="3" x2="5" y2="3" stroke="#4d3200" strokeWidth="1.2" strokeLinecap="round" />
+                </svg>
+              )}
+            </button>
+
+            {/* Green — maximize / restore */}
+            <button
+              onClick={() => setIsMaximized((v) => !v)}
+              className="flex h-3 w-3 items-center justify-center rounded-full bg-[#28c840] transition-opacity hover:opacity-90"
+              aria-label={isMaximized ? 'Restore terminal' : 'Maximize terminal'}
+            >
+              {dotHover && (
+                <svg width="6" height="6" viewBox="0 0 6 6" fill="none">
+                  {isMaximized ? (
+                    /* Restore: two arrows pointing inward */
+                    <>
+                      <line x1="1.5" y1="4.5" x2="4.5" y2="1.5" stroke="#003200" strokeWidth="1.1" strokeLinecap="round" />
+                      <polyline points="1.5,2.5 1.5,4.5 3.5,4.5" stroke="#003200" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                      <polyline points="4.5,3.5 4.5,1.5 2.5,1.5" stroke="#003200" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                    </>
+                  ) : (
+                    /* Maximize: two arrows pointing outward */
+                    <>
+                      <line x1="1.5" y1="4.5" x2="4.5" y2="1.5" stroke="#003200" strokeWidth="1.1" strokeLinecap="round" />
+                      <polyline points="3.5,4.5 1.5,4.5 1.5,2.5" stroke="#003200" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                      <polyline points="2.5,1.5 4.5,1.5 4.5,3.5" stroke="#003200" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                    </>
+                  )}
+                </svg>
+              )}
+            </button>
           </div>
           <span className="ml-3 font-mono text-xs text-white/25">~/0png — terminal</span>
           <span className="ml-auto font-mono text-[10px] uppercase tracking-widest text-white/20">
