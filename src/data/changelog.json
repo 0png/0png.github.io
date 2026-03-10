@@ -1,5 +1,11 @@
 [
   {
+    "date": "2026-03-10",
+    "subject": "feat: add contact section, revamp mobile nav, and update project content",
+    "body": "- Add ContactSection + ContactDashboard React island with activity bar\n  chart (from github-stats.json), Discord copy button, live HKT clock,\n  status indicator, and email row\n- Fix tooltip positioning via createPortal to escape backdrop-filter\n  stacking context\n- Add scripts/fetch-github-stats.js + bake:stats npm script for\n  pre-building the activity data at build time\n- Add contactConfig.ts and fallback contribution generator\n- Revamp mobile navbar to full-screen overlay with fade transition and\n  aria-expanded; add CONTACT nav link; bump z-index to z-[60]\n- Rewrite lumix.md, uniconvert.md, upmods.md project devlogs with\n  accurate stack, features, and usage sections\n- Update block-blast-slayer.md tags (add PWA) and 0png-portfolio.md\n  minor content edits\n- Sync projects.ts Uniconvert tags/excerpt with updated devlog\n- Document GITHUB_TOKEN in .env.example",
+    "hash": "3b20981"
+  },
+  {
     "date": "2026-03-08",
     "subject": "content: update project data, devlogs, navbar, and terminal palette",
     "body": "- Rewrite 0png-portfolio devlog with accurate feature descriptions\n- Rewrite block-blast-slayer devlog to reflect JS/DFS-based solver\n- Update project tags and descriptions in projects.ts\n- Add CHANGELOG nav link to Navbar and TerminalPalette",
@@ -52,11 +58,5 @@
     "subject": "feat: redesign About section with HUD, terminal, and fix Marquee loop",
     "body": "- Refactor About.astro into full-viewport section with two-column layout\n- Add macOS-style interactive terminal with typewriter GSAP reveal\n- Add Control Console HUD (real-time HKT clock, geo coords, public IP)\n- Add 40px lit grid background with intersection dots and spotlight orbs\n- Fix Marquee.astro seamless loop using per-item padding-right strategy\n- Add Adobe Premiere Pro, After Effects, Obsidian, Python to tech stack\n- Add avatar card with scanline hover effect and parallax depth lag",
     "hash": "b0bfcb7"
-  },
-  {
-    "date": "2026-03-08",
-    "subject": "feat: enhance Hero with animated orbs, spotlight, and text reveal",
-    "body": "Add three drifting light orbs, a mouse-tracking GSAP spotlight, a\nmore visible dot grid with four-sided edge vignettes, per-word\nclip-path reveal animation, and a shadcn Badge status indicator.",
-    "hash": "9139c54"
   }
 ]
