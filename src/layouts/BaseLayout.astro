@@ -107,9 +107,11 @@ const ogImage = image.startsWith('http') ? image : `${siteUrl}${image}`
       initScroll()
     </script>
     <script>
-      // TESTING: show on all devices — revert to mobile-only after
-      const el = document.getElementById('mobile-notice')
-      if (el) el.hidden = false
+      const isMobile = navigator.maxTouchPoints > 0 && window.innerWidth < 1024
+      if (isMobile) {
+        const el = document.getElementById('mobile-notice')
+        if (el) el.hidden = false
+      }
       document.getElementById('mobile-notice-close')?.addEventListener('click', () => {
         const el = document.getElementById('mobile-notice')
         if (el) el.hidden = true
