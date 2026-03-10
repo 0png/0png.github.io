@@ -6,9 +6,14 @@ import TerminalPalette from '@/components/TerminalPalette'
 interface Props {
   title: string
   description?: string
+  image?: string
 }
 
 const { title, description } = Astro.props
+const image = Astro.props.image ?? '/og-image.png'
+const canonicalUrl = Astro.url.href
+const siteUrl = Astro.site?.origin ?? 'https://0png.github.io'
+const ogImage = image.startsWith('http') ? image : `${siteUrl}${image}`
 ---
 
 <!doctype html>
@@ -20,6 +25,20 @@ const { title, description } = Astro.props
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:title" content={title} />
+    {description && <meta property="og:description" content={description} />}
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:site_name" content="0PNG" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    {description && <meta name="twitter:description" content={description} />}
+    <meta name="twitter:image" content={ogImage} />
     <style>
       #mobile-notice {
         position: fixed;
@@ -30,26 +49,54 @@ const { title, description } = Astro.props
         font-family: ui-monospace, 'Cascadia Code', 'Fira Code', monospace;
         font-size: 0.75rem;
         line-height: 1.4;
-        color: rgb(251 191 36); /* amber-400 */
-        background: rgba(0, 0, 0, 0.72);
+        color: rgb(251 191 36);
+        background: rgba(0, 0, 0, 0.82);
         border: 1px solid rgba(251, 191, 36, 0.25);
         border-radius: 4px;
-        padding: 0.45rem 0.85rem;
-        white-space: nowrap;
+        padding: 0.45rem 0.6rem 0.45rem 0.85rem;
         backdrop-filter: blur(6px);
-        pointer-events: none;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        max-width: calc(100vw - 2rem);
+        box-sizing: border-box;
+      }
+      .mobile-notice-text {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        min-width: 0;
       }
       .mobile-notice-prefix {
         color: rgb(251 191 36 / 60%);
         margin-right: 0.35em;
+        flex-shrink: 0;
+      }
+      #mobile-notice-close {
+        flex-shrink: 0;
+        background: none;
+        border: none;
+        color: rgb(251 191 36 / 50%);
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 0.75rem;
+        padding: 0 0.1rem;
+        line-height: 1;
+        transition: color 0.15s;
+      }
+      #mobile-notice-close:hover {
+        color: rgb(251 191 36);
       }
     </style>
   </head>
   <body>
     <!-- Mobile notice — hidden by default, revealed by JS on touch devices -->
     <div id="mobile-notice" aria-live="polite" hidden>
-      <span class="mobile-notice-prefix">[&nbsp;NOTICE&nbsp;]:</span>
-      For the best CLI experience, please use a desktop browser.
+      <span class="mobile-notice-text">
+        <span class="mobile-notice-prefix">[&nbsp;NOTICE&nbsp;]:</span>
+        Best experienced on desktop.
+      </span>
+      <button id="mobile-notice-close" aria-label="Dismiss notice">✕</button>
     </div>
 
     <Navbar />
@@ -60,12 +107,13 @@ const { title, description } = Astro.props
       initScroll()
     </script>
     <script>
-      const isMobile =
-        navigator.maxTouchPoints > 0 && window.innerWidth < 1024
-      if (isMobile) {
+      // TESTING: show on all devices — revert to mobile-only after
+      const el = document.getElementById('mobile-notice')
+      if (el) el.hidden = false
+      document.getElementById('mobile-notice-close')?.addEventListener('click', () => {
         const el = document.getElementById('mobile-notice')
-        if (el) el.hidden = false
-      }
+        if (el) el.hidden = true
+      })
     </script>
   </body>
 </html>

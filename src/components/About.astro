@@ -372,4 +372,39 @@ const { bio: _bio } = Astro.props
     ease: 'none',
     scrollTrigger: { trigger: section, start: 'top bottom', end: 'bottom top', scrub: 0.9 },
   })
+
+  // ── Background layer parallax (multi-depth) ────────────────
+  const orb1 = section.querySelector<HTMLElement>('.about-orb-1')
+  const orb2 = section.querySelector<HTMLElement>('.about-orb-2')
+  const grid = section.querySelector<HTMLElement>('.about-grid')
+  const spotlight = section.querySelector<HTMLElement>('.about-spotlight')
+
+  if (orb1) {
+    gsap.to(orb1, {
+      yPercent: -30,
+      ease: 'none',
+      scrollTrigger: { trigger: section, start: 'top bottom', end: 'bottom top', scrub: 1.5 },
+    })
+  }
+  if (orb2) {
+    gsap.to(orb2, {
+      yPercent: -18,
+      ease: 'none',
+      scrollTrigger: { trigger: section, start: 'top bottom', end: 'bottom top', scrub: 2.5 },
+    })
+  }
+  if (grid) {
+    gsap.to(grid, {
+      yPercent: -8,
+      ease: 'none',
+      scrollTrigger: { trigger: section, start: 'top bottom', end: 'bottom top', scrub: 3 },
+    })
+  }
+  if (spotlight) {
+    gsap.to(spotlight, {
+      yPercent: -20,
+      ease: 'none',
+      scrollTrigger: { trigger: section, start: 'top bottom', end: 'bottom top', scrub: 2 },
+    })
+  }
 </script>

@@ -12,5 +12,8 @@ export function initScroll(): Lenis {
 
   lenis.on('scroll', ScrollTrigger.update)
 
+  // Expose globally so components can hook into the same Lenis instance
+  ;(window as unknown as Record<string, unknown>).lenis = lenis
+
   return lenis
 }

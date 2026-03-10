@@ -206,10 +206,23 @@ function stripPrefix(s: string): string {
 
   gsap.registerPlugin(ScrollTrigger)
 
-  document.querySelectorAll<HTMLElement>('[data-cl-section-item]').forEach((item) => {
+  // Background vignette parallax
+  gsap.to('#changelog .pointer-events-none', {
+    yPercent: -25,
+    ease: 'none',
+    scrollTrigger: {
+      trigger: '#changelog',
+      start: 'top bottom',
+      end: 'bottom top',
+      scrub: 1,
+    },
+  })
+
+  document.querySelectorAll<HTMLElement>('[data-cl-section-item]').forEach((item, i) => {
     const card = item.querySelector<HTMLElement>('.cl-section-card')
     if (!card) return
 
+    // Entry reveal
     gsap.fromTo(
       card,
       { autoAlpha: 0, y: 22 },
@@ -224,6 +237,19 @@ function stripPrefix(s: string): string {
         },
       },
     )
+
+    // Staggered scroll-depth parallax — alternating sides drift at different speeds
+    const isLeft = i % 2 === 0
+    gsap.to(card, {
+      yPercent: isLeft ? -10 : -5,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: item,
+        start: 'top bottom',
+        end: 'bottom top',
+        scrub: isLeft ? 2 : 1.2,
+      },
+    })
   })
 
   // Read More for mobile body text

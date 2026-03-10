@@ -34,13 +34,11 @@ const placeholderCount = Math.max(0, MAX - displayed.length)
           aria-hidden="true"
           class="flex w-full flex-col overflow-hidden rounded-2xl border border-dashed border-white/[0.08] bg-card"
         >
-          <!-- Mirror the cover area height -->
           <div class="relative h-52 overflow-hidden">
             <div
               class="absolute inset-0"
               style="background: radial-gradient(ellipse 80% 60% at 30% 40%, rgba(255,255,255,0.02) 0%, transparent 70%);"
             />
-            <!-- Ghost slot number -->
             <span
               class="pointer-events-none absolute bottom-3 right-4 select-none font-mono font-black leading-none tracking-tighter text-white/[0.04]"
               style="font-size: clamp(5rem, 10vw, 7rem);"
@@ -53,7 +51,6 @@ const placeholderCount = Math.max(0, MAX - displayed.length)
             />
           </div>
 
-          <!-- Mirror the content area -->
           <div class="flex flex-1 flex-col gap-4 p-6">
             <div class="flex flex-wrap gap-1.5">
               <span class="inline-flex items-center rounded-full border border-white/[0.06] px-2.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-widest text-white/20">
@@ -101,6 +98,9 @@ const placeholderCount = Math.max(0, MAX - displayed.length)
 
 <script>
   import gsap from 'gsap'
+  import { ScrollTrigger } from 'gsap/ScrollTrigger'
+
+  gsap.registerPlugin(ScrollTrigger)
 
   const grid = document.getElementById('projects-grid')
   if (grid) {
@@ -113,10 +113,7 @@ const placeholderCount = Math.max(0, MAX - displayed.length)
         duration: 0.6,
         ease: 'power2.out',
         stagger: 0.1,
-        scrollTrigger: {
-          trigger: grid,
-          start: 'top 80%',
-        },
+        scrollTrigger: { trigger: grid, start: 'top 80%' },
       },
     )
   }

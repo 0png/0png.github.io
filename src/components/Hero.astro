@@ -47,7 +47,7 @@ const words = headline.split(' ')
   />
 
   <!-- Content -->
-  <div class="relative z-10 flex flex-col items-center gap-8 text-center">
+  <div id="hero-content" class="relative z-10 flex flex-col items-center gap-8 text-center">
     <!-- Status badge (shadcn Badge variant) -->
     <span
       class={`hero-badge ${badgeVariants({ variant: 'outline' })} gap-2 border-white/[0.12] bg-white/[0.03] px-4 py-1.5 text-white/50 backdrop-blur-sm`}
@@ -86,7 +86,7 @@ const words = headline.split(' ')
       class="hero-trigger font-mono"
       aria-label="Open terminal command palette (Ctrl+K)"
     >
-      <span class="text-white/40">&gt; press </span><span class="text-white/65">[Ctrl + K]</span><span class="text-white/40"> to launch terminal</span><span class="hero-cursor text-white/50">_</span>
+      <span class="text-white/40">&gt; </span><span class="hero-type-1 text-white/40"></span><span class="hero-type-2 text-white/65"></span><span class="hero-type-3 text-white/40"></span><span class="hero-cursor text-white/50">_</span>
     </button>
   </div>
 
@@ -217,6 +217,7 @@ const words = headline.split(' ')
     cursor: pointer;
     transition: box-shadow 0.25s ease, border-color 0.25s ease;
     backdrop-filter: blur(6px);
+    text-align: left;
   }
   .hero-trigger:hover {
     border-color: rgba(255, 255, 255, 0.18);
@@ -249,11 +250,18 @@ const words = headline.split(' ')
       transform: none !important;
     }
     .hero-cursor { animation: none; }
+    #hero-content { transform: none !important; }
+    .hero-type-1::before { content: 'press '; }
+    .hero-type-2::before { content: '[Ctrl + K]'; }
+    .hero-type-3::before { content: ' to launch terminal'; }
   }
 </style>
 
 <script>
   import gsap from 'gsap'
+  import { ScrollTrigger } from 'gsap/ScrollTrigger'
+
+  gsap.registerPlugin(ScrollTrigger)
 
   const hero = document.getElementById('hero')!
   const spotlight = hero.querySelector<HTMLElement>('.hero-spotlight')!
@@ -263,10 +271,20 @@ const words = headline.split(' ')
   const trigger = hero.querySelector<HTMLElement>('.hero-trigger')!
   const indicator = hero.querySelector<HTMLElement>('.hero-indicator')!
   const scrollLine = hero.querySelector<HTMLElement>('.hero-scroll-line')!
+  const content = document.getElementById('hero-content')!
+  const orb1 = hero.querySelector<HTMLElement>('.hero-orb-1')!
+  const orb2 = hero.querySelector<HTMLElement>('.hero-orb-2')!
+  const orb3 = hero.querySelector<HTMLElement>('.hero-orb-3')!
+  const dots = hero.querySelector<HTMLElement>('.hero-dots')!
 
-  // Mouse-tracking spotlight
+  // ── Mouse-tracking spotlight + 3D content tilt ────────────
   hero.addEventListener('mousemove', (e) => {
     const rect = hero.getBoundingClientRect()
+    const cx = rect.width / 2
+    const cy = rect.height / 2
+    const dx = (e.clientX - rect.left - cx) / cx
+    const dy = (e.clientY - rect.top - cy) / cy
+
     gsap.to(spotlight, {
       left: e.clientX - rect.left,
       top: e.clientY - rect.top,
@@ -274,6 +292,25 @@ const words = headline.split(' ')
       ease: 'power2.out',
       overwrite: 'auto',
     })
+
+    gsap.to(content, {
+      rotateX: dy * -4,
+      rotateY: dx * 4,
+      transformPerspective: 1200,
+      duration: 0.9,
+      ease: 'power2.out',
+      overwrite: 'auto',
+    })
+
+    // Subtle orb drift with mouse
+    gsap.to(orb1, { x: dx * 18, y: dy * 12, duration: 1.2, ease: 'power2.out', overwrite: 'auto' })
+    gsap.to(orb2, { x: dx * -22, y: dy * 16, duration: 1.4, ease: 'power2.out', overwrite: 'auto' })
+    gsap.to(orb3, { x: dx * 14, y: dy * -20, duration: 1.6, ease: 'power2.out', overwrite: 'auto' })
+  })
+
+  hero.addEventListener('mouseleave', () => {
+    gsap.to(content, { rotateX: 0, rotateY: 0, duration: 1.2, ease: 'power3.out', overwrite: 'auto' })
+    gsap.to([orb1, orb2, orb3], { x: 0, y: 0, duration: 1.4, ease: 'power3.out', overwrite: 'auto' })
   })
 
   // Terminal trigger click → dispatch shared event
@@ -281,13 +318,87 @@ const words = headline.split(' ')
     window.dispatchEvent(new Event('open-terminal'))
   })
 
-  // Entry animation
+  // ── Typewriter loop for terminal trigger ───────────────────
+  function startTypewriter() {
+    const parts = [
+      { el: hero.querySelector<HTMLElement>('.hero-type-1')!, text: 'press ' },
+      { el: hero.querySelector<HTMLElement>('.hero-type-2')!, text: '[Ctrl + K]' },
+      { el: hero.querySelector<HTMLElement>('.hero-type-3')!, text: ' to launch terminal' },
+    ]
+    const totalChars = parts.reduce((s, p) => s + p.text.length, 0)
+
+    // Lock width to full text so the button never resizes
+    parts.forEach((p) => (p.el.textContent = p.text))
+    trigger.style.minWidth = trigger.offsetWidth + 'px'
+    parts.forEach((p) => (p.el.textContent = ''))
+
+    // Always update ALL spans so clearing works correctly across part boundaries
+    function renderAt(count: number) {
+      let remaining = count
+      for (const part of parts) {
+        const chunk = Math.min(remaining, part.text.length)
+        part.el.textContent = part.text.slice(0, chunk)
+        remaining -= chunk
+      }
+    }
+
+    function scheduleType(charIndex: number) {
+      if (charIndex > totalChars) {
+        gsap.delayedCall(2.2, () => scheduleDelete(totalChars))
+        return
+      }
+      renderAt(charIndex)
+
+      const progress = charIndex / totalChars
+      const eased = 0.5 - 0.5 * Math.cos(Math.PI * progress)
+      const baseDelay = 82 - eased * 54
+      const jitter = (Math.random() - 0.5) * 32
+
+      gsap.delayedCall((baseDelay + jitter) / 1000, () => scheduleType(charIndex + 1))
+    }
+
+    function scheduleDelete(charIndex: number) {
+      if (charIndex < 0) {
+        gsap.delayedCall(0.55, () => scheduleType(0))
+        return
+      }
+      renderAt(charIndex)
+
+      const progress = charIndex / totalChars
+      const eased = Math.pow(progress, 0.45)
+      const baseDelay = 22 + (1 - eased) * 68
+      const jitter = (Math.random() - 0.5) * 20
+
+      gsap.delayedCall((baseDelay + jitter) / 1000, () => scheduleDelete(charIndex - 1))
+    }
+
+    scheduleType(0)
+  }
+
+  // ── Entry animation ────────────────────────────────────────
   const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
 
   tl.to(badge, { opacity: 1, y: 0, duration: 0.7, delay: 0.1 })
     .to(words, { opacity: 1, y: 0, duration: 0.8, stagger: 0.055 }, '-=0.35')
     .to(rule, { opacity: 1, scaleX: 1, duration: 0.7, ease: 'power2.inOut' }, '-=0.4')
-    .to(trigger, { opacity: 1, y: 0, duration: 0.55 }, '-=0.3')
+    .to(trigger, { opacity: 1, y: 0, duration: 0.55, onComplete: startTypewriter }, '-=0.3')
     .to(indicator, { opacity: 1, duration: 0.5 }, '-=0.3')
     .to(scrollLine, { scaleY: 1, duration: 1, ease: 'power2.inOut' }, '<')
+
+  // ── Multi-layer scroll parallax ───────────────────────────
+  const parallaxBase = { ease: 'none', scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true } }
+
+  // Orbs at 3 different depths (furthest = slowest upward drift)
+  gsap.to(orb1, { yPercent: -22, ...parallaxBase })
+  gsap.to(orb2, { yPercent: -48, ...parallaxBase })
+  gsap.to(orb3, { yPercent: -65, ...parallaxBase })
+
+  // Dot grid — mid-depth
+  gsap.to(dots, { yPercent: -18, ...parallaxBase })
+
+  // Hero content block — moves slightly slower than page scroll
+  gsap.to(content, { yPercent: -14, ...parallaxBase })
+
+  // Scroll indicator accelerates out of view quickly
+  gsap.to(indicator, { yPercent: -55, opacity: 0, ...parallaxBase })
 </script>
