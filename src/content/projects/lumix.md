@@ -8,19 +8,43 @@ excerpt: "Your screen, ambient."
 ---
 
 ## Overview
+Lumix is a lightweight, all-in-one Minecraft server manager built with Electron and React. It provides a seamless GUI for managing multiple server instances, supporting various cores like Vanilla, Paper, Fabric, and Forge. Designed for efficiency, it handles Java detection, memory allocation, and real-time console monitoring, making server administration effortless for both beginners and power users.
 
-A minimal ambient lighting app that samples colours along the edges of your screen in real time and syncs them to Philips Hue or WLED smart bulbs, extending the on-screen image into the room around you.
+---
 
 ## Stack
+* **Desktop Framework:** Electron + Vite
+* **Frontend:** React + TypeScript
+* **UI Components:** Tailwind CSS + shadcn/ui
+* **Build System:** pnpm workspace monorepo
 
-- **UI shell**: Tauri (Rust backend, minimal webview frontend)
-- **Screen capture**: Python + `mss` for cross-platform screen sampling
-- **Light control**: Philips Hue API, WLED HTTP API
-- **IPC**: Tauri commands bridge Python subprocess to the frontend
+---
 
-## How It Works
+## Features
 
-1. A Python process captures a strip of pixels along each screen edge at ~60fps
-2. Each strip is averaged into a single representative colour per edge
-3. Colours are mapped to bulb zones and sent over the local network via HTTP
-4. Tauri frontend provides a system tray icon and settings panel
+### Server Management
+* **Multi-Core Support:** Native support for Vanilla, Paper, Fabric, and Forge.
+* **Instance Control:** Easily create, start, stop, and delete server instances.
+* **Properties Editor:** Built-in GUI editor to modify `server.properties` without touching raw text files.
+
+### Monitoring & Interaction
+* **Real-time Console:** Monitor server logs in real-time and send commands directly through the integrated console panel.
+* **Auto Java Detection:** Automatically identifies and configures installed Java versions.
+
+### User Experience
+* **Customization:** Full support for Light/Dark themes (system-synced or manual) and multi-language support (English / Traditional Chinese(zhTW)).
+* **Flexible Configuration:** Adjustable default memory settings and custom Java path configuration.
+
+---
+
+## Requirements
+* **OS:** Windows 10 or later
+* **Runtime:** Java 8+ (auto-detected)
+* **Memory:** 4GB RAM minimum
+
+---
+
+## Usage
+1. **Create Server:** Click the "+" button, enter a name, select the core/version, and set memory allocation.
+2. **Control:** Select a server from your list and use the Start/Stop controls.
+3. **Manage:** Use the console panel to view logs or send commands to the server.

@@ -1,14 +1,12 @@
 ---
 title: "BlockBlast Slayer"
 date: 2025-11-27
-tags: ["HTML", "JavaScript", "CSS"]
+tags: ["HTML", "JavaScript", "CSS", "PWA"]
 repoUrl: "https://github.com/0png/blockblast"
 demoUrl: "https://0png.github.io/blockblast/"
 status: archived
 excerpt: "A JavaScript-based solver for Block Blast–style puzzles."
 ---
-
-# Block Blast Solver
 
 ## Overview
 A JavaScript-based solver for Block Blast–style puzzles.

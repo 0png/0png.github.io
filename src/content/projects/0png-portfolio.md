@@ -12,6 +12,8 @@ excerpt: "The site you're looking at right now."
 
 Personal portfolio website built with Astro 5, GSAP 3, and Tailwind CSS v4. The design leans into a developer-first aesthetic — monochromatic palette, CLI-style typography, and a terminal command palette as the primary navigation interface. Every section has its own scroll-driven animation choreography.
 
+---
+
 ## Stack
 
 - **Framework**: Astro 5 (static output, content collections)
@@ -21,12 +23,16 @@ Personal portfolio website built with Astro 5, GSAP 3, and Tailwind CSS v4. The 
 - **Language**: TypeScript 5 (strict mode)
 - **Deployment**: GitHub Pages via GitHub Actions
 
+--
+
 ## Pages
 
 - **Home** — hero, about, tech stack marquee, projects preview, changelog preview, footer
 - **Projects** — full responsive grid of all projects with cover images and tags
 - **Projects / [slug]** — individual project devlogs rendered from markdown content collections
 - **Changelog** — full commit history timeline pulled from `changelog.json`
+
+--
 
 ## Features
 
@@ -51,10 +57,3 @@ Full-viewport footer with a 3D perspective grid floor (`rotateX(60deg)`), animat
 ### Tech Stack Marquee
 Infinite CSS marquee via `translateX(-50%)` keyframe. Respects `prefers-reduced-motion` — falls back to `animation-duration: 0.01ms`.
 
-## What I Learned
-
-The GSAP + Lenis integration is subtle to get right. Lenis owns the RAF loop; GSAP consumes it via `gsap.ticker.add`. Calling `gsap.ticker.lagSmoothing(0)` is essential — without it, GSAP's lag compensation fights Lenis's easing and produces visible jitter on heavy paint frames.
-
-For the terminal palette, keeping the command registry as a plain object of `(args: string) => Line[]` functions made it trivial to add new commands without touching the shell dispatch logic. The autocomplete ghost text is just a positioned `<span>` behind the real `<input>` — no library needed.
-
-Building the About HUD taught me to be intentional about what "real-time" actually costs. The IP fetch is fire-and-forget on mount. The clock is a single `setInterval` writing to one DOM node. Neither one is expensive, but grouping them in the same component made the cleanup logic clean.

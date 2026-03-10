@@ -29,8 +29,8 @@ export const projects: Project[] = [
     title: 'Uniconvert',
     description:
       'A fast, offline-first unit converter covering length, mass, temperature, currency, and more. No ads, no tracking, just conversions.',
-    excerpt: 'Every unit. No friction.',
-    tags: ['Javascript', 'CSS', 'Electron'],
+    excerpt: 'Seamless conversions, zero friction.',
+    tags: ['JavaScript', 'React', 'Electron'],
     devlogSlug: 'uniconvert',
     year: 2026,
     featured: true,
@@ -66,7 +66,7 @@ export const projects: Project[] = [
     description:
       'Solve your BlockBlast puzzle with advanced algorithms.',
     excerpt: 'Solve your BlockBlast puzzle in seconds',
-    tags: ['JavaScript', 'CSS', 'HTML'],
+    tags: ['JavaScript', 'CSS', 'HTML', 'PWA'],
     devlogSlug: 'block-blast-slayer',
     year: 2025,
     featured: true,

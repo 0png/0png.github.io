@@ -8,7 +8,8 @@
     "preview": "astro preview",
     "astro": "astro",
     "lint": "eslint src --ext .ts,.tsx,.astro",
-    "test": "vitest run"
+    "test": "vitest run",
+    "bake:stats": "node scripts/fetch-github-stats.js"
   },
   "dependencies": {
     "@astrojs/react": "^4.4.2",
