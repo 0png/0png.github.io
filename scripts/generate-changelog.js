@@ -17,12 +17,6 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 
 // ── Config ────────────────────────────────────────────────────────────────────
 
-/** Fetch more raw commits than the final limit to absorb filtered-out entries. */
-const FETCH_COUNT = 30
-
-/** Final number of entries written to JSON. */
-const OUTPUT_LIMIT = 10
-
 const OUT_PATH = resolve(__dirname, '../src/data/changelog.json')
 
 // Commit subjects to always exclude (case-insensitive prefix match)
@@ -39,7 +33,7 @@ const SKIP_PREFIXES = ['ci:', 'init:', 'test:', 'chore: update changelog.json']
 let raw
 try {
   raw = execSync(
-    `git log -${FETCH_COUNT} --no-merges --format=%x1E%h%x00%cs%x00%s%x00%b`,
+    'git log --no-merges --format=%x1E%h%x00%cs%x00%s%x00%b',
     { encoding: 'utf8' },
   )
 } catch (err) {
@@ -76,7 +70,6 @@ const entries = raw
     const lc = e.subject.toLowerCase()
     return !SKIP_PREFIXES.some((p) => lc.startsWith(p.toLowerCase()))
   })
-  .slice(0, OUTPUT_LIMIT)
 
 // ── Write ─────────────────────────────────────────────────────────────────────
 

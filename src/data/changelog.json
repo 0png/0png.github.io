@@ -1,6 +1,30 @@
 [
   {
     "date": "2026-05-09",
+    "subject": "feat: redesign changelog surfaces and align homepage CTA interactions",
+    "body": "- redesign the homepage changelog section as a terminal-style activity feed with refined motion, simplified row hover behavior, and a bottom-up fill hover for the full changelog CTA\n- align the projects section View All Projects button with the same bottom-up fill hover treatment used by the homepage changelog CTA\n- update the standalone changelog page changes currently in the worktree and add integration coverage for changelog page rendering plus the refreshed homepage scroll experience assertions\n- include the codex environment metadata currently present in the workspace",
+    "hash": "0601b15"
+  },
+  {
+    "date": "2026-05-09",
+    "subject": "fix: refine portfolio load and contact interactions",
+    "body": "Limit the boot loading animation to the homepage by making BaseLayout render the boot overlay only when showBoot is enabled.\n\nKeep the Hero terminal command trigger visible during the pinned parallax scroll by moving fade and blur effects onto the headline elements instead of the whole content container.\n\nAlign Contact section spine nodes by giving the node wrapper a fixed 20px square so the vertical line passes through the dot center.\n\nBake GitHub contribution stats during the GitHub Pages deploy workflow before Astro builds, using the Actions-provided GH_TOKEN so the contact activity chart refreshes on every deployment.",
+    "hash": "4206e7f"
+  },
+  {
+    "date": "2026-05-09",
+    "subject": "feat: enhance scroll experience",
+    "body": "",
+    "hash": "c44cb35"
+  },
+  {
+    "date": "2026-05-09",
+    "subject": "fix: generate changelog during deploy",
+    "body": "",
+    "hash": "6b2b49c"
+  },
+  {
+    "date": "2026-05-09",
     "subject": "chore: stabilize Windows project setup",
     "body": "",
     "hash": "221b0fe"
@@ -58,5 +82,77 @@
     "subject": "feat: add smart sticky navbar and fix projects page layout",
     "body": "- Add Navbar component with smart hide/show on scroll (rAF-based),\n  glassmorphism backdrop, terminal-style [ LINK ] formatting, pinging\n  status indicator, and GSAP entrance animation\n- Mount Navbar globally via BaseLayout\n- Add [HOME], [ABOUT], [PROJECTS] links; PROJECTS anchors to /#projects\n- Add id=\"projects\" to ProjectsSection for anchor navigation\n- Fix /projects back button z-index conflict by converting from fixed to\n  inline breadcrumb with proper pt offset\n- Add Footer to /projects standalone page and BlogLayout (devlog pages)",
     "hash": "aa3a3d0"
+  },
+  {
+    "date": "2026-03-08",
+    "subject": "feat: simplify ProjectsSection animation and add back-link to projects page",
+    "body": "- Replace all parallax logic with a simple GSAP fade-up stagger on scroll\n- Clean up ProjectCard: remove cover-parallax classes and will-change-transform\n- Remove unused ScrollTrigger import from ProjectsSection\n- Add fixed terminal-style back link (← ~/home) to /projects/index.astro",
+    "hash": "a4dd05b"
+  },
+  {
+    "date": "2026-03-08",
+    "subject": "feat: implement 6-grid progressive disclosure for ProjectsSection",
+    "body": "- Slice projects to max 6; fill remaining slots with \"Coming Soon\"\n  placeholder cards that mirror exact ProjectCard dimensions\n- Always render \"View All Projects\" terminal-style button linking to /projects\n- Remove fixed horizontal-scroll widths from ProjectCard (w-full for grid)\n- Add /projects/index.astro stub listing all projects in responsive grid\n- Remove src/lib/horizontalScroll.ts and its unit tests",
+    "hash": "f45d423"
+  },
+  {
+    "date": "2026-03-08",
+    "subject": "feat: replace Notion blog with content collections, add projects pages and Footer",
+    "body": "- Migrate blog from Notion API to Astro content collections (projects/)\n- Add project detail pages via src/pages/projects/[slug].astro\n- Add Footer component with tests\n- Remove Notion integration (notion.ts, blog/[slug].astro, related tests)\n- Enhance ProjectCard, ProjectsSection, BlogLayout, and horizontalScroll\n- Update project data in projects.ts and CI workflow",
+    "hash": "c638a09"
+  },
+  {
+    "date": "2026-03-08",
+    "subject": "feat: redesign About section with HUD, terminal, and fix Marquee loop",
+    "body": "- Refactor About.astro into full-viewport section with two-column layout\n- Add macOS-style interactive terminal with typewriter GSAP reveal\n- Add Control Console HUD (real-time HKT clock, geo coords, public IP)\n- Add 40px lit grid background with intersection dots and spotlight orbs\n- Fix Marquee.astro seamless loop using per-item padding-right strategy\n- Add Adobe Premiere Pro, After Effects, Obsidian, Python to tech stack\n- Add avatar card with scanline hover effect and parallax depth lag",
+    "hash": "b0bfcb7"
+  },
+  {
+    "date": "2026-03-08",
+    "subject": "feat: enhance Hero with animated orbs, spotlight, and text reveal",
+    "body": "Add three drifting light orbs, a mouse-tracking GSAP spotlight, a\nmore visible dot grid with four-sided edge vignettes, per-word\nclip-path reveal animation, and a shadcn Badge status indicator.",
+    "hash": "9139c54"
+  },
+  {
+    "date": "2026-03-08",
+    "subject": "feat: implement US3 Hero, About, and Marquee components (T034-T037)",
+    "body": "Add full-viewport Hero section, bio About section, and CSS-only infinite\nMarquee for the tech stack. Wire all three into index.astro above\nProjectsSection, completing the above-the-fold homepage experience.",
+    "hash": "01f2b7b"
+  },
+  {
+    "date": "2026-03-07",
+    "subject": "fix: gracefully handle Notion API failure in getStaticPaths",
+    "body": "Wrap getAllDevlogs() in a try-catch so a missing or invalid\nNOTION_TOKEN produces a warning and an empty blog route list\ninstead of crashing the build.",
+    "hash": "222bb26"
+  },
+  {
+    "date": "2026-03-07",
+    "subject": "fix: add missing class-variance-authority dependency",
+    "body": "shadcn button.tsx imports cva from class-variance-authority but it\nwas never explicitly installed, causing Rollup to fail at build time.",
+    "hash": "ef0fac2"
+  },
+  {
+    "date": "2026-03-07",
+    "subject": "feat: implement US2 Notion blog layer (T029-T033)",
+    "body": "- Add src/lib/notion.ts with Client init, getAllDevlogs(), getDevlogBySlug(), and transformNotionPage() returning typed DevlogEntry\n- Add src/layouts/BlogLayout.astro with formatted date, back-link, and markdown slot\n- Add src/pages/blog/[slug].astro with getStaticPaths() and marked-powered HTML rendering\n- Update ProjectCard.astro devlog link to use buttonVariants for consistent styling\n- Install marked for markdown-to-HTML conversion at build time\n- All 29 tests pass (notion.test.ts + blog-routes.test.ts green)",
+    "hash": "6972c1e"
+  },
+  {
+    "date": "2026-03-07",
+    "subject": "feat: implement US1 projects section (T020-T026)",
+    "body": "- Add 3 placeholder Project entries to src/data/projects.ts\n- Implement GSAP horizontal scroll with pin+scrub+parallax in src/lib/horizontalScroll.ts\n- Build premium monochromatic ProjectCard.astro with tag pills, ghost year overlay, and conditional devlog link\n- Build ProjectsSection.astro with responsive vertical stack below md breakpoint and ScrollTrigger resize refresh\n- Bootstrap src/pages/index.astro with BaseLayout and featured projects\n- Expand global.css with full shadcn CSS variable set and @theme inline block for Tailwind v4\n- Fix vi.mock hoisting bug in horizontalScroll.test.ts using vi.hoisted(); add jsdom environment\n- Install jsdom dev dependency for browser-API unit tests\n- All 15 tests pass (T017, T018, T019)",
+    "hash": "31a39a1"
+  },
+  {
+    "date": "2026-03-07",
+    "subject": "feat: add UI components, data layer, layouts, scroll utilities, and tests",
+    "body": "- Add shadcn/ui button and badge components\n- Add site config, projects, and tech stack data files\n- Add BaseLayout Astro layout with Lenis scroll integration\n- Add scroll and utils library helpers\n- Add unit tests for data and scroll utilities\n- Add eslint config and shadcn components.json\n- Update package.json with sorted deps and new radix-ui/slot",
+    "hash": "005d990"
+  },
+  {
+    "date": "2026-03-07",
+    "subject": "feat: scaffold 001-portfolio-website with Astro, React, Tailwind, and tooling",
+    "body": "Sets up the full project structure including Astro 5.x config, React 18\nislands, Tailwind CSS v4, ESLint, Vitest, CI/CD GitHub Actions workflows,\nand initial page/style stubs. Updates package.json with all production\nand dev dependencies.",
+    "hash": "7b606b7"
   }
 ]
