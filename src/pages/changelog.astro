@@ -5,22 +5,32 @@ import { siteConfig } from '@/data/siteConfig'
 import changelog from '@/data/changelog.json'
 
 type Entry = { date: string; subject: string; body: string; hash: string }
+type TypeKey = 'feat' | 'fix' | 'refactor' | 'chore' | 'content' | 'misc'
+type TypeMeta = {
+  label: TypeKey
+  token: string
+  chipCls: string
+  nodeCls: string
+  graphCls: string
+}
 
-// Filter out boilerplate git meta commits
 const SKIP_PREFIXES = ['ci:', 'init:', 'test:']
 const entries = (changelog as Entry[]).filter(
   (e) => !SKIP_PREFIXES.some((p) => e.subject.toLowerCase().startsWith(p)),
 )
 
-const lastUpdated = entries[0]?.date
-  ? new Date(entries[0].date).toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    })
-  : '—'
-
 const repoBase = `${siteConfig.githubUrl}/${siteConfig.name.toLowerCase()}/commit`
+const lastUpdated = entries[0]?.date ? formatDate(entries[0].date) : '--'
+const typeOrder: TypeKey[] = ['feat', 'fix', 'refactor', 'content', 'chore', 'misc']
+const typeCounts = Object.fromEntries(typeOrder.map((type) => [type, 0])) as Record<TypeKey, number>
+
+entries.forEach((entry) => {
+  typeCounts[getType(entry.subject).label] += 1
+})
+
+const activeTypes = typeOrder.filter((type) => typeCounts[type] > 0)
+const bodyEntries = entries.filter((entry) => cleanBody(entry.body).length > 0).length
+const latestHash = entries[0]?.hash ?? '-------'
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString('en-GB', {
@@ -38,195 +48,340 @@ function cleanBody(raw: string): string {
     .trim()
 }
 
-type TypeMeta = { label: string; cls: string }
 function getType(subject: string): TypeMeta {
   const s = subject.toLowerCase()
   if (s.startsWith('feat:'))
-    return { label: 'feat', cls: 'text-emerald-400 border-emerald-400/30 bg-emerald-400/[0.06]' }
+    return {
+      label: 'feat',
+      token: '+',
+      chipCls: 'text-emerald-300 border-emerald-400/25 bg-emerald-400/[0.07]',
+      nodeCls: 'border-emerald-400/70 bg-emerald-400/15 shadow-[0_0_16px_rgba(52,211,153,0.34)]',
+      graphCls: 'text-emerald-400',
+    }
   if (s.startsWith('fix:'))
-    return { label: 'fix', cls: 'text-rose-400 border-rose-400/30 bg-rose-400/[0.06]' }
+    return {
+      label: 'fix',
+      token: '!',
+      chipCls: 'text-rose-300 border-rose-400/25 bg-rose-400/[0.07]',
+      nodeCls: 'border-rose-400/70 bg-rose-400/15 shadow-[0_0_16px_rgba(251,113,133,0.3)]',
+      graphCls: 'text-rose-400',
+    }
   if (s.startsWith('refactor:'))
-    return { label: 'refactor', cls: 'text-sky-400 border-sky-400/30 bg-sky-400/[0.06]' }
+    return {
+      label: 'refactor',
+      token: '~',
+      chipCls: 'text-sky-300 border-sky-400/25 bg-sky-400/[0.07]',
+      nodeCls: 'border-sky-400/70 bg-sky-400/15 shadow-[0_0_16px_rgba(56,189,248,0.3)]',
+      graphCls: 'text-sky-400',
+    }
+  if (s.startsWith('content:'))
+    return {
+      label: 'content',
+      token: '#',
+      chipCls: 'text-amber-300 border-amber-400/25 bg-amber-400/[0.07]',
+      nodeCls: 'border-amber-400/70 bg-amber-400/15 shadow-[0_0_16px_rgba(251,191,36,0.32)]',
+      graphCls: 'text-amber-400',
+    }
   if (s.startsWith('chore:'))
-    return { label: 'chore', cls: 'text-zinc-400 border-zinc-400/30 bg-zinc-400/[0.06]' }
-  return { label: 'misc', cls: 'text-amber-400 border-amber-400/30 bg-amber-400/[0.06]' }
+    return {
+      label: 'chore',
+      token: '=',
+      chipCls: 'text-zinc-300 border-zinc-400/20 bg-zinc-400/[0.06]',
+      nodeCls: 'border-zinc-400/55 bg-zinc-400/10 shadow-[0_0_14px_rgba(212,212,216,0.16)]',
+      graphCls: 'text-zinc-400',
+    }
+  return {
+    label: 'misc',
+    token: '*',
+    chipCls: 'text-cyan-300 border-cyan-400/25 bg-cyan-400/[0.07]',
+    nodeCls: 'border-cyan-400/65 bg-cyan-400/12 shadow-[0_0_15px_rgba(34,211,238,0.24)]',
+    graphCls: 'text-cyan-400',
+  }
 }
 
-function stripPrefix(s: string): string {
-  return s.replace(/^[a-z]+:\s*/i, '')
+function stripPrefix(subject: string): string {
+  return subject.replace(/^[a-z]+:\s*/i, '')
 }
 ---
 
 <BaseLayout
-  title={`Changelog — ${siteConfig.name}`}
-  description="A chronological record of notable commits and changes to this project."
+  title={`Changelog - ${siteConfig.name}`}
+  description="A terminal-style commit history for the 0PNG portfolio."
 >
-  <!-- ── Atmospheric background ─────────────────────────────────── -->
-  <div class="pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden="true">
-    <!-- Fine fractal noise texture -->
-    <div
-      class="absolute inset-0"
-      style="
-        opacity: 0.035;
-        background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22%3E%3Cfilter id=%22n%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.88%22 numOctaves=%224%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22/%3E%3C/svg%3E');
-        background-size: 200px 200px;
-      "
-    >
-    </div>
-    <!-- Bottom-right deep-purple vignette -->
-    <div
-      class="absolute inset-0"
-      style="background: radial-gradient(ellipse 65% 50% at 100% 100%, rgba(88,28,135,0.13) 0%, transparent 65%);"
-    >
-    </div>
-    <!-- Top-left slate vignette -->
-    <div
-      class="absolute inset-0"
-      style="background: radial-gradient(ellipse 55% 40% at 0% 0%, rgba(15,23,42,0.45) 0%, transparent 60%);"
-    >
-    </div>
+  <div class="changelog-hud pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden="true">
+    <div class="hud-grid absolute inset-0"></div>
+    <div class="hud-noise absolute inset-0"></div>
+    <div class="hud-scanlines absolute inset-0"></div>
+    <div class="absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-background to-transparent"></div>
+    <div class="absolute inset-x-0 bottom-0 h-60 bg-gradient-to-t from-background to-transparent"></div>
   </div>
 
-  <main class="relative z-10 mx-auto max-w-5xl px-6 pt-28 pb-28 md:px-8">
-    <!-- Breadcrumb -->
+  <main class="relative z-10 mx-auto max-w-7xl px-5 pt-28 pb-24 md:px-8 lg:pt-32">
     <a
       href="/"
-      class="inline-flex items-center gap-2 font-mono text-xs text-white/30 hover:text-amber-400 transition-colors duration-200 mb-14 group"
+      class="group mb-10 inline-flex items-center gap-2 font-mono text-xs text-white/35 transition-colors duration-200 hover:text-amber-300"
     >
-      <span
-        class="inline-block group-hover:-translate-x-1 transition-transform duration-200"
-        aria-hidden="true">←</span
-      >
+      <span class="transition-transform duration-200 group-hover:-translate-x-1" aria-hidden="true">&lt;</span>
       ~/home
     </a>
 
-    <!-- Page header -->
-    <div class="mb-20">
-      <p class="font-mono text-[11px] uppercase tracking-[0.35em] text-white/20">
-        git log --pretty=format:"%h %s" --no-merges
-      </p>
-      <h1 class="mt-3 text-5xl font-bold tracking-tight text-foreground md:text-6xl">
-        CHANGELOG
-      </h1>
-      <p class="mt-4 font-mono text-xs text-white/30">
-        last updated&nbsp;<span class="text-amber-400">{lastUpdated}</span>
-        <span class="mx-3 text-white/10">·</span>
-        <span>{entries.length} entries</span>
-      </p>
-    </div>
+    <section class="relative mb-8 overflow-hidden border border-white/[0.08] bg-neutral-950/62 backdrop-blur-md">
+      <div class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+      <div class="grid gap-8 p-5 md:p-7 lg:grid-cols-[1.15fr_0.85fr] lg:p-8">
+        <div class="min-w-0">
+          <div class="mb-5 flex flex-wrap items-center gap-2 border-b border-white/[0.06] pb-4 font-mono text-[11px] text-white/35">
+            <span class="text-white/20">$</span>
+            <span>git log --graph --decorate --no-merges</span>
+            <span class="ml-auto text-emerald-300/70">HEAD@{latestHash}</span>
+          </div>
 
-    <!-- ── Zigzag Timeline ─────────────────────────────────────── -->
-    <ol class="relative" aria-label="Changelog timeline">
-      <!-- Vertical spine -->
-      <div
-        class="absolute left-3 top-0 bottom-0 w-px md:left-1/2 md:-translate-x-px"
-        style="background: linear-gradient(to bottom, transparent 0%, rgba(251,191,36,0.14) 8%, rgba(251,191,36,0.14) 92%, transparent 100%);"
-        aria-hidden="true"
-      >
+          <p class="font-mono text-[11px] uppercase tracking-[0.32em] text-amber-300/55">
+            /var/log/portfolio.timeline
+          </p>
+          <h1 class="mt-3 text-4xl font-black tracking-tight text-neutral-50 md:text-6xl lg:text-7xl">
+            CHANGELOG
+          </h1>
+          <p class="mt-5 max-w-2xl text-sm leading-7 text-neutral-400 md:text-base">
+            A live-feeling commit stream for the portfolio: filtered git history, decoded hashes,
+            expandable bodies, and a terminal HUD built for scanning the evolution of the site.
+          </p>
+        </div>
+
+        <div class="grid gap-3 font-mono text-xs">
+          <div class="grid grid-cols-2 gap-3">
+            <div class="border border-white/[0.07] bg-black/35 p-4">
+              <p class="text-white/25">entries</p>
+              <p class="mt-2 text-3xl font-semibold tabular-nums text-white">{entries.length}</p>
+            </div>
+            <div class="border border-white/[0.07] bg-black/35 p-4">
+              <p class="text-white/25">last update</p>
+              <p class="mt-2 text-lg font-semibold tabular-nums text-amber-300">{lastUpdated}</p>
+            </div>
+          </div>
+
+          <div class="border border-white/[0.07] bg-black/35 p-4">
+            <div class="mb-3 flex items-center justify-between text-white/25">
+              <span>type distribution</span>
+              <span>{bodyEntries} with body</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
+              {
+                activeTypes.map((type) => (
+                  <span class={`flex items-center justify-between border px-2.5 py-2 text-[11px] ${getType(`${type}:`).chipCls}`}>
+                    <span>{type}</span>
+                    <span class="tabular-nums">{typeCounts[type]}</span>
+                  </span>
+                ))
+              }
+            </div>
+          </div>
+        </div>
       </div>
+    </section>
 
-      {
-        entries.map((entry, i) => {
-          const isLeft = i % 2 === 0
-          const body = cleanBody(entry.body)
-          const type = getType(entry.subject)
-          const title = stripPrefix(entry.subject)
+    <section
+      class="mb-10 border border-white/[0.08] bg-neutral-950/68 p-3 shadow-[0_22px_70px_rgba(0,0,0,0.24)] backdrop-blur-md"
+      aria-label="Changelog controls"
+      data-controls-panel
+    >
+      <div class="grid gap-3 lg:grid-cols-[minmax(260px,1fr)_auto_auto] lg:items-center">
+        <label class="group relative block">
+          <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 font-mono text-xs text-white/25">$ grep</span>
+          <input
+            type="search"
+            placeholder="subject, body, hash..."
+            class="h-11 w-full border border-white/[0.07] bg-black/45 pl-16 pr-4 font-mono text-sm text-white outline-none transition-colors placeholder:text-white/20 focus:border-amber-300/35"
+            data-changelog-search
+          />
+        </label>
 
-          const card = (
-            <article class="cl-card group relative rounded-sm border border-white/[0.06] bg-neutral-950/55 px-5 py-5 backdrop-blur-sm transition-all duration-300 hover:border-amber-400/[0.16] hover:shadow-[0_0_28px_rgba(251,191,36,0.045)] hover:bg-neutral-950/70">
-              {/* Subtle inner top highlight */}
-              <div
-                class="pointer-events-none absolute inset-x-0 top-0 h-px rounded-t-sm"
-                style="background: linear-gradient(to right, transparent, rgba(255,255,255,0.04), transparent);"
-                aria-hidden="true"
-              />
-
-              {/* Type badge + date */}
-              <div class="flex items-center justify-between gap-3 mb-3">
-                <span
-                  class={`inline-flex items-center rounded-sm border px-2 py-[3px] font-mono text-[10px] font-semibold uppercase tracking-widest ${type.cls}`}
-                >
-                  {type.label}
-                </span>
-                <time datetime={entry.date} class="font-mono text-[11px] text-white/25">
-                  {formatDate(entry.date)}
-                </time>
-              </div>
-
-              {/* Subject */}
-              <h3 class="break-words text-[14px] font-semibold leading-snug text-neutral-100 tracking-[-0.01em]">
-                {title}
-              </h3>
-
-              {/* Body */}
-              {body && (
-                <div>
-                  <p
-                    class="cl-body-text mt-3 border-t border-white/[0.05] pt-3 font-sans text-[12px] leading-relaxed text-neutral-500 whitespace-pre-line break-words"
-                    style="--cl-lines: 4"
-                    data-body-text
-                  >
-                    {body}
-                  </p>
-                  <button
-                    type="button"
-                    class="read-more-btn mt-2 hidden font-mono text-[10px] text-amber-400/60 transition-colors hover:text-amber-400"
-                    aria-expanded="false"
-                  >
-                    Read more ↓
-                  </button>
-                </div>
-              )}
-
-              {/* Footer: hash */}
-              <div class="mt-4 flex items-center justify-between border-t border-white/[0.04] pt-3">
-                <span class="font-mono text-[10px] text-white/12 tracking-widest">SHA-1</span>
-                <a
-                  href={`${repoBase}/${entry.hash}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="font-mono text-[11px] text-neutral-600 hover:text-amber-400 transition-colors duration-200"
-                  aria-label={`View commit ${entry.hash} on GitHub`}
-                >
-                  {entry.hash}
-                </a>
-              </div>
-            </article>
-          )
-
-          return (
-            <li
-              class="relative grid grid-cols-[24px_1fr] items-start pb-14 last:pb-0 md:grid-cols-[1fr_48px_1fr]"
-              data-cl-item
-            >
-              {/* Node: left-aligned on mobile, centered on desktop */}
-              <div class="col-start-1 row-start-1 relative z-10 flex justify-center pt-[18px] md:col-start-2">
-                <div class="relative flex items-center justify-center">
-                  <div
-                    class="absolute h-5 w-5 rounded-full bg-amber-400/[0.08] animate-pulse"
-                    aria-hidden="true"
-                  />
-                  <div class="relative h-[11px] w-[11px] rounded-full border border-amber-400/55 bg-neutral-950 shadow-[0_0_8px_rgba(251,191,36,0.22)]" />
-                </div>
-              </div>
-
-              {/* Card: single-column on mobile, alternating on desktop */}
-              <div
-                class={`col-start-2 row-start-1 pl-4 md:pl-0 ${isLeft ? 'md:col-start-1 md:col-end-2 md:pr-7' : 'md:col-start-3 md:pl-7'}`}
+        <div class="flex flex-wrap gap-2" role="group" aria-label="Filter changelog type">
+          <button
+            type="button"
+            class="filter-chip is-active border border-amber-300/30 bg-amber-300/[0.09] px-3 py-2 font-mono text-[11px] uppercase tracking-widest text-amber-200 transition-all"
+            data-filter-chip
+            data-filter-type="all"
+            aria-pressed="true"
+          >
+            all <span class="text-white/35">{entries.length}</span>
+          </button>
+          {
+            activeTypes.map((type) => (
+              <button
+                type="button"
+                class={`filter-chip border px-3 py-2 font-mono text-[11px] uppercase tracking-widest transition-all ${getType(`${type}:`).chipCls}`}
+                data-filter-chip
+                data-filter-type={type}
+                aria-pressed="false"
               >
-                {card}
-              </div>
-            </li>
-          )
-        })
-      }
-    </ol>
+                {type} <span class="text-white/35">{typeCounts[type]}</span>
+              </button>
+            ))
+          }
+        </div>
 
-    <!-- Genesis marker -->
-    <div class="relative mt-8 flex justify-center" aria-hidden="true">
-      <div class="font-mono text-[11px] text-white/18 border border-white/[0.05] px-5 py-2 tracking-widest">
-        ── GENESIS ──
+        <div class="flex gap-2">
+          <button
+            type="button"
+            class="border border-white/[0.08] px-3 py-2 font-mono text-[11px] uppercase tracking-widest text-white/45 transition-colors hover:border-emerald-300/30 hover:text-emerald-200"
+            data-expand-all
+          >
+            expand all
+          </button>
+          <button
+            type="button"
+            class="border border-white/[0.08] px-3 py-2 font-mono text-[11px] uppercase tracking-widest text-white/45 transition-colors hover:border-amber-300/30 hover:text-amber-200"
+            data-collapse-all
+          >
+            collapse all
+          </button>
+        </div>
       </div>
+
+      <p class="mt-3 font-mono text-[11px] text-white/25" aria-live="polite" data-result-count>
+        showing {entries.length} of {entries.length} commits
+      </p>
+    </section>
+
+    <div class="grid gap-8 scroll-mt-28 lg:grid-cols-[280px_minmax(0,1fr)]" data-commit-stream>
+      <aside class="hidden lg:block">
+        <div class="sticky top-44 border border-white/[0.08] bg-neutral-950/58 p-5 font-mono text-xs text-white/38 backdrop-blur-md">
+          <p class="mb-4 text-[11px] uppercase tracking-[0.28em] text-white/25">legend</p>
+          <div class="space-y-3">
+            {
+              activeTypes.map((type) => (
+                <div class="flex items-center justify-between gap-3">
+                  <span class="flex items-center gap-2">
+                    <span class={`h-2.5 w-2.5 rounded-full border ${getType(`${type}:`).nodeCls}`}></span>
+                    {type}
+                  </span>
+                  <span class="tabular-nums text-white/25">{typeCounts[type]}</span>
+                </div>
+              ))
+            }
+          </div>
+          <div class="mt-6 border-t border-white/[0.06] pt-4">
+            <p class="text-white/22">interaction map</p>
+            <p class="mt-2 leading-6">
+              hover rows to wake the graph line, click commit bodies to inspect details, and use grep
+              to isolate changes without leaving the page.
+            </p>
+          </div>
+        </div>
+      </aside>
+
+      <section class="relative min-w-0" aria-label="Commit stream">
+        <div
+          class="absolute left-[17px] top-0 bottom-0 w-px overflow-hidden bg-gradient-to-b from-transparent via-amber-300/15 to-transparent md:left-[25px]"
+          aria-hidden="true"
+        >
+          <div
+            class="absolute inset-x-0 top-0 h-full origin-top scale-y-0 bg-gradient-to-b from-transparent via-amber-300/80 to-transparent shadow-[0_0_20px_rgba(251,191,36,0.46)]"
+            data-spine-progress
+          >
+          </div>
+        </div>
+
+        <ol class="space-y-4" data-entry-list>
+          {
+            entries.map((entry, i) => {
+              const body = cleanBody(entry.body)
+              const type = getType(entry.subject)
+              const title = stripPrefix(entry.subject)
+              const searchText = `${entry.subject} ${body} ${entry.hash} ${entry.date}`.toLowerCase()
+
+              return (
+                <li
+                  class="commit-entry relative grid grid-cols-[36px_minmax(0,1fr)] gap-3 md:grid-cols-[52px_minmax(0,1fr)] md:gap-4"
+                  data-entry
+                  data-type={type.label}
+                  data-search-text={searchText}
+                  data-expanded={body ? 'false' : 'true'}
+                >
+                  <div class="relative flex justify-center pt-6">
+                    <span class={`commit-node relative z-10 flex h-4 w-4 items-center justify-center rounded-full border bg-neutral-950 ${type.nodeCls}`}>
+                      <span class="h-1.5 w-1.5 rounded-full bg-current opacity-70"></span>
+                    </span>
+                  </div>
+
+                  <article class="commit-card group relative overflow-hidden border border-white/[0.075] bg-neutral-950/58 p-4 backdrop-blur-md transition-all duration-300 hover:border-amber-300/22 hover:bg-neutral-950/78 hover:shadow-[0_0_34px_rgba(251,191,36,0.055)] md:p-5">
+                    <div class="commit-card-line pointer-events-none absolute inset-y-0 left-0 w-px bg-white/10 transition-colors duration-300 group-hover:bg-amber-300/70"></div>
+                    <div class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent"></div>
+
+                    <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                      <div class="min-w-0">
+                        <div class="mb-2 flex flex-wrap items-center gap-2 font-mono text-[11px]">
+                          <span class={`${type.graphCls}`}>* {type.token}</span>
+                          <span class={`border px-2 py-1 uppercase tracking-widest ${type.chipCls}`}>{type.label}</span>
+                          <time datetime={entry.date} class="text-white/25">{formatDate(entry.date)}</time>
+                          <span class="text-white/12">row:{String(i + 1).padStart(2, '0')}</span>
+                        </div>
+                        <h2 class="break-words text-base font-semibold leading-snug text-neutral-100 md:text-lg">
+                          {title}
+                        </h2>
+                      </div>
+
+                      <a
+                        href={`${repoBase}/${entry.hash}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="commit-hash shrink-0 font-mono text-xs text-white/32 transition-colors duration-200 hover:text-amber-300"
+                        data-hash={entry.hash}
+                        aria-label={`View commit ${entry.hash} on GitHub`}
+                      >
+                        {entry.hash}
+                      </a>
+                    </div>
+
+                    {
+                      body ? (
+                        <div class="mt-4 border-t border-white/[0.06] pt-4">
+                          <div
+                            class="body-shell overflow-hidden transition-[max-height] duration-300 ease-out"
+                            data-body-shell
+                          >
+                            <p
+                              class="commit-body whitespace-pre-line break-words text-sm leading-7 text-neutral-400"
+                              data-body-text
+                            >
+                              {body}
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            class="mt-3 font-mono text-[11px] uppercase tracking-widest text-amber-300/65 transition-colors hover:text-amber-200"
+                            aria-expanded="false"
+                            data-toggle-body
+                          >
+                            expand body
+                          </button>
+                        </div>
+                      ) : (
+                        <p class="mt-4 border-t border-white/[0.06] pt-4 font-mono text-xs text-white/22">
+                          no extended commit body
+                        </p>
+                      )
+                    }
+                  </article>
+                </li>
+              )
+            })
+          }
+        </ol>
+
+        <div
+          class="mt-10 hidden border border-amber-300/20 bg-amber-300/[0.04] px-4 py-5 font-mono text-sm text-amber-100/70"
+          data-empty-state
+        >
+          no commits matched current grep/filter
+        </div>
+
+        <div class="mt-10 flex justify-center" aria-hidden="true">
+          <div class="border border-white/[0.07] bg-neutral-950/55 px-5 py-2 font-mono text-[11px] uppercase tracking-[0.28em] text-white/22">
+            end of log
+          </div>
+        </div>
+      </section>
     </div>
   </main>
 
@@ -234,11 +389,67 @@ function stripPrefix(s: string): string {
 </BaseLayout>
 
 <style>
-  .cl-body-text:not([data-expanded='true']) {
-    display: -webkit-box;
-    -webkit-line-clamp: var(--cl-lines, 4);
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+  .hud-grid {
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.026) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.026) 1px, transparent 1px),
+      radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.075), transparent 36%);
+    background-size: 48px 48px, 48px 48px, 100% 100%;
+    mask-image: radial-gradient(circle at center, black 0%, black 58%, transparent 100%);
+  }
+
+  .hud-noise {
+    opacity: 0.03;
+    background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22180%22 height=%22180%22%3E%3Cfilter id=%22n%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%224%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22/%3E%3C/svg%3E');
+    background-size: 180px 180px;
+  }
+
+  .hud-scanlines {
+    opacity: 0.42;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 3px,
+      rgba(255, 255, 255, 0.022) 4px
+    );
+  }
+
+  .filter-chip.is-active {
+    box-shadow:
+      0 0 22px rgba(251, 191, 36, 0.08),
+      inset 0 0 0 1px rgba(251, 191, 36, 0.08);
+  }
+
+  .commit-entry.is-hidden {
+    display: none;
+  }
+
+  .commit-entry[data-expanded='false'] [data-body-shell] {
+    max-height: 4.75rem;
+  }
+
+  .commit-entry[data-expanded='true'] [data-body-shell] {
+    max-height: 34rem;
+  }
+
+  .commit-entry.is-active .commit-node {
+    transform: scale(1.18);
+  }
+
+  .commit-entry.is-active .commit-card-line {
+    background: rgba(251, 191, 36, 0.78);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hud-scanlines {
+      opacity: 0.25;
+    }
+
+    .commit-card,
+    .commit-node,
+    [data-body-shell] {
+      transition: none !important;
+    }
   }
 </style>
 
@@ -248,51 +459,222 @@ function stripPrefix(s: string): string {
 
   gsap.registerPlugin(ScrollTrigger)
 
-  document.querySelectorAll<HTMLElement>('[data-cl-item]').forEach((item) => {
-    const card = item.querySelector<HTMLElement>('.cl-card')
-    if (!card) return
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  const searchInput = document.querySelector<HTMLInputElement>('[data-changelog-search]')
+  const filterChips = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-filter-chip]'))
+  const entries = Array.from(document.querySelectorAll<HTMLElement>('[data-entry]'))
+  const resultCount = document.querySelector<HTMLElement>('[data-result-count]')
+  const emptyState = document.querySelector<HTMLElement>('[data-empty-state]')
+  const expandAll = document.querySelector<HTMLButtonElement>('[data-expand-all]')
+  const collapseAll = document.querySelector<HTMLButtonElement>('[data-collapse-all]')
+  const spineProgress = document.querySelector<HTMLElement>('[data-spine-progress]')
+  const commitStream = document.querySelector<HTMLElement>('[data-commit-stream]')
+  let activeType = 'all'
 
-    gsap.fromTo(
-      card,
-      { autoAlpha: 0, y: 22 },
-      {
-        autoAlpha: 1,
-        y: 0,
-        duration: 0.65,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: item,
-          start: 'top 88%',
-        },
-      },
-    )
-  })
+  function scrambleHash(el: HTMLElement) {
+    if (reduceMotion) return
 
-  function setupExpandableBodies() {
-    document.querySelectorAll<HTMLElement>('[data-body-text]').forEach((p) => {
-      const btn = p.nextElementSibling as HTMLButtonElement | null
-      if (!btn?.classList.contains('read-more-btn')) return
+    const final = el.dataset.hash ?? el.textContent ?? ''
+    const glyphs = '0123456789abcdef'
+    let frame = 0
+    const maxFrames = 16
 
-      const expanded = btn.getAttribute('aria-expanded') === 'true'
-      p.dataset.expanded = String(expanded)
-      btn.textContent = expanded ? 'Read less ↑' : 'Read more ↓'
+    const tick = () => {
+      frame += 1
+      const solved = Math.floor((frame / maxFrames) * final.length)
+      el.textContent = final
+        .split('')
+        .map((char, i) => (i < solved ? char : glyphs[Math.floor(Math.random() * glyphs.length)]))
+        .join('')
 
-      const overflows = p.scrollHeight > p.clientHeight + 1
-      btn.classList.toggle('hidden', !expanded && !overflows)
-
-      if (!btn.dataset.bound) {
-        btn.dataset.bound = '1'
-        btn.addEventListener('click', () => {
-          const nextExpanded = btn.getAttribute('aria-expanded') !== 'true'
-          btn.setAttribute('aria-expanded', String(nextExpanded))
-          p.dataset.expanded = String(nextExpanded)
-          btn.textContent = nextExpanded ? 'Read less ↑' : 'Read more ↓'
-          btn.classList.remove('hidden')
-        })
+      if (frame < maxFrames) {
+        window.requestAnimationFrame(tick)
+      } else {
+        el.textContent = final
       }
+    }
+
+    tick()
+  }
+
+  function setBodyExpanded(entry: HTMLElement, expanded: boolean) {
+    const shell = entry.querySelector<HTMLElement>('[data-body-shell]')
+    const button = entry.querySelector<HTMLButtonElement>('[data-toggle-body]')
+    if (!shell || !button) return
+
+    entry.dataset.expanded = String(expanded)
+    button.setAttribute('aria-expanded', String(expanded))
+    button.textContent = expanded ? 'collapse body' : 'expand body'
+  }
+
+  function setActiveChip(type: string) {
+    activeType = type
+    filterChips.forEach((chip) => {
+      const active = chip.dataset.filterType === type
+      chip.classList.toggle('is-active', active)
+      chip.setAttribute('aria-pressed', String(active))
+    })
+    applyFilters()
+    scrollToFirstVisibleEntry()
+  }
+
+  function scrollToFirstVisibleEntry() {
+    window.requestAnimationFrame(() => {
+      const target = document.querySelector<HTMLElement>('[data-entry]:not(.is-hidden)') ?? commitStream
+      if (!target) return
+
+      const top = window.scrollY + target.getBoundingClientRect().top - 92
+      const lenis = (window as Window & { lenis?: { scrollTo: (target: number, options?: { duration?: number; offset?: number }) => void } }).lenis
+
+      if (lenis && !reduceMotion) {
+        lenis.scrollTo(top, { duration: 0.8 })
+        return
+      }
+
+      window.scrollTo({
+        top,
+        behavior: reduceMotion ? 'auto' : 'smooth',
+      })
     })
   }
 
-  setupExpandableBodies()
-  window.addEventListener('resize', setupExpandableBodies, { passive: true })
+  function applyFilters() {
+    const query = searchInput?.value.trim().toLowerCase() ?? ''
+    let visible = 0
+
+    entries.forEach((entry) => {
+      const type = entry.dataset.type ?? ''
+      const searchText = entry.dataset.searchText ?? ''
+      const matchesType = activeType === 'all' || type === activeType
+      const matchesQuery = !query || searchText.includes(query)
+      const show = matchesType && matchesQuery
+
+      entry.classList.toggle('is-hidden', !show)
+      entry.setAttribute('aria-hidden', String(!show))
+      visible += show ? 1 : 0
+
+      if (!reduceMotion) {
+        gsap.to(entry, {
+          autoAlpha: show ? 1 : 0,
+          y: show ? 0 : 8,
+          duration: 0.18,
+          overwrite: 'auto',
+        })
+      }
+    })
+
+    if (resultCount) {
+      resultCount.textContent = `showing ${visible} of ${entries.length} commits`
+    }
+    emptyState?.classList.toggle('hidden', visible !== 0)
+    ScrollTrigger.refresh()
+  }
+
+  entries.forEach((entry) => {
+    const card = entry.querySelector<HTMLElement>('.commit-card')
+    const hash = entry.querySelector<HTMLElement>('.commit-hash')
+    const toggle = entry.querySelector<HTMLButtonElement>('[data-toggle-body]')
+
+    if (toggle) {
+      toggle.addEventListener('click', () => {
+        setBodyExpanded(entry, entry.dataset.expanded !== 'true')
+        ScrollTrigger.refresh()
+      })
+    }
+
+    card?.addEventListener('mouseenter', () => {
+      entry.classList.add('is-active')
+      if (hash) scrambleHash(hash)
+      if (!reduceMotion) {
+        gsap.to(card, {
+          rotateX: -1.2,
+          rotateY: 1.4,
+          transformPerspective: 900,
+          duration: 0.35,
+          ease: 'power2.out',
+          overwrite: 'auto',
+        })
+      }
+    })
+
+    card?.addEventListener('mouseleave', () => {
+      entry.classList.remove('is-active')
+      if (!reduceMotion && card) {
+        gsap.to(card, {
+          rotateX: 0,
+          rotateY: 0,
+          duration: 0.45,
+          ease: 'power3.out',
+          overwrite: 'auto',
+        })
+      }
+    })
+  })
+
+  filterChips.forEach((chip) => {
+    chip.addEventListener('click', () => setActiveChip(chip.dataset.filterType ?? 'all'))
+  })
+
+  searchInput?.addEventListener('input', () => {
+    applyFilters()
+    scrollToFirstVisibleEntry()
+  })
+  expandAll?.addEventListener('click', () => {
+    entries.forEach((entry) => {
+      if (!entry.classList.contains('is-hidden')) setBodyExpanded(entry, true)
+    })
+    ScrollTrigger.refresh()
+  })
+  collapseAll?.addEventListener('click', () => {
+    entries.forEach((entry) => setBodyExpanded(entry, false))
+    ScrollTrigger.refresh()
+  })
+
+  if (!reduceMotion) {
+    entries.forEach((entry) => {
+      const card = entry.querySelector<HTMLElement>('.commit-card')
+      const hash = entry.querySelector<HTMLElement>('.commit-hash')
+      if (!card) return
+
+      gsap.fromTo(
+        card,
+        { autoAlpha: 0, y: 24 },
+        {
+          autoAlpha: 1,
+          y: 0,
+          duration: 0.62,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: entry,
+            start: 'top 88%',
+            onEnter: () => {
+              entry.classList.add('is-active')
+              if (hash && !hash.dataset.scrambled) {
+                hash.dataset.scrambled = 'true'
+                scrambleHash(hash)
+              }
+              gsap.delayedCall(0.42, () => entry.classList.remove('is-active'))
+            },
+          },
+        },
+      )
+    })
+
+    if (spineProgress) {
+      gsap.to(spineProgress, {
+        scaleY: 1,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: '[data-entry-list]',
+          start: 'top 75%',
+          end: 'bottom 70%',
+          scrub: true,
+        },
+      })
+    }
+  } else if (spineProgress) {
+    gsap.set(spineProgress, { scaleY: 1 })
+  }
+
+  applyFilters()
 </script>

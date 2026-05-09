@@ -26,18 +26,38 @@ function cleanBody(raw: string): string {
     .trim()
 }
 
-type TypeMeta = { label: string; cls: string }
+type TypeMeta = { label: string; cls: string; dot: string }
 function getType(subject: string): TypeMeta {
   const s = subject.toLowerCase()
   if (s.startsWith('feat:'))
-    return { label: 'feat', cls: 'text-emerald-400 border-emerald-400/30 bg-emerald-400/[0.06]' }
+    return {
+      label: 'feat',
+      cls: 'text-emerald-400 border-emerald-400/30 bg-emerald-400/[0.06]',
+      dot: 'bg-emerald-400 shadow-[0_0_14px_rgba(52,211,153,0.45)]',
+    }
   if (s.startsWith('fix:'))
-    return { label: 'fix', cls: 'text-rose-400 border-rose-400/30 bg-rose-400/[0.06]' }
+    return {
+      label: 'fix',
+      cls: 'text-rose-400 border-rose-400/30 bg-rose-400/[0.06]',
+      dot: 'bg-rose-400 shadow-[0_0_14px_rgba(251,113,133,0.45)]',
+    }
   if (s.startsWith('refactor:'))
-    return { label: 'refactor', cls: 'text-sky-400 border-sky-400/30 bg-sky-400/[0.06]' }
+    return {
+      label: 'refactor',
+      cls: 'text-sky-400 border-sky-400/30 bg-sky-400/[0.06]',
+      dot: 'bg-sky-400 shadow-[0_0_14px_rgba(56,189,248,0.45)]',
+    }
   if (s.startsWith('chore:'))
-    return { label: 'chore', cls: 'text-zinc-400 border-zinc-400/30 bg-zinc-400/[0.06]' }
-  return { label: 'misc', cls: 'text-amber-400 border-amber-400/30 bg-amber-400/[0.06]' }
+    return {
+      label: 'chore',
+      cls: 'text-zinc-400 border-zinc-400/30 bg-zinc-400/[0.06]',
+      dot: 'bg-zinc-400 shadow-[0_0_14px_rgba(161,161,170,0.35)]',
+    }
+  return {
+    label: 'misc',
+    cls: 'text-amber-400 border-amber-400/30 bg-amber-400/[0.06]',
+    dot: 'bg-amber-400 shadow-[0_0_14px_rgba(251,191,36,0.45)]',
+  }
 }
 
 function stripPrefix(s: string): string {
@@ -50,168 +70,246 @@ function stripPrefix(s: string): string {
   class="relative overflow-hidden px-6 py-20 md:px-8 md:py-28"
   aria-label="Changelog"
 >
-  <!-- Section-scoped vignette (non-fixed, relative to section) -->
-  <div
-    class="changelog-bg pointer-events-none absolute inset-0 z-0"
-    style="background: radial-gradient(ellipse 60% 50% at 100% 100%, rgba(88,28,135,0.08) 0%, transparent 65%);"
-    aria-hidden="true"
-  >
+  <div class="changelog-bg pointer-events-none absolute inset-0 z-0" aria-hidden="true">
+    <div class="changelog-grid absolute inset-0"></div>
+    <div class="changelog-light changelog-light-a absolute"></div>
+    <div class="changelog-light changelog-light-b absolute"></div>
+    <div class="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-background to-transparent"></div>
+    <div class="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-background to-transparent"></div>
   </div>
 
   <div class="relative z-10 mx-auto max-w-5xl">
-    <!-- Section header -->
-    <div class="mb-16">
+    <div class="changelog-header mb-10 md:mb-12">
       <p class="font-mono text-[11px] uppercase tracking-[0.35em] text-white/20">
         git log --pretty=format:"%h %s" --no-merges
       </p>
-      <h2 class="mt-3 text-3xl font-bold tracking-tight text-foreground md:text-4xl">
-        CHANGELOG
-      </h2>
+      <div class="mt-3 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+        <h2 class="text-3xl font-bold tracking-tight text-foreground md:text-4xl">
+          CHANGELOG
+        </h2>
+        <p class="max-w-md font-mono text-[11px] leading-relaxed text-white/25">
+          <span class="text-emerald-400/70">live feed</span>
+          <span class="text-white/15"> / </span>
+          latest public commits from the build log
+        </p>
+      </div>
     </div>
 
-    <!-- Zigzag Timeline -->
-    <ol id="changelog-list" class="relative" aria-label="Recent commits">
-      <!-- Vertical spine: left-aligned on mobile, centered on desktop -->
-      <div
-        class="absolute left-3 md:left-1/2 top-0 bottom-0 w-px overflow-hidden md:-translate-x-px"
-        style="background: linear-gradient(to bottom, transparent 0%, rgba(251,191,36,0.14) 10%, rgba(251,191,36,0.14) 90%, transparent 100%);"
-        aria-hidden="true"
-      >
-        <div class="changelog-spine-progress absolute inset-x-0 top-0 h-full origin-top scale-y-0 bg-gradient-to-b from-transparent via-amber-400/70 to-transparent shadow-[0_0_18px_rgba(251,191,36,0.45)]"></div>
+    <div
+      class="changelog-terminal relative overflow-hidden rounded-lg border border-white/[0.08] bg-neutral-950/70 shadow-2xl shadow-black/35 backdrop-blur-sm"
+    >
+      <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.045),transparent_55%)]"></div>
+      <div class="changelog-scanline pointer-events-none absolute inset-0 opacity-0"></div>
+
+      <div class="relative flex items-center gap-2 border-b border-white/[0.07] bg-black/55 px-4 py-3">
+        <span class="h-2.5 w-2.5 rounded-full bg-[#ff5f57]"></span>
+        <span class="h-2.5 w-2.5 rounded-full bg-[#febc2e]"></span>
+        <span class="h-2.5 w-2.5 rounded-full bg-[#28c840]"></span>
+        <span class="ml-3 truncate font-mono text-[11px] uppercase tracking-[0.24em] text-white/25">
+          ~/0png/release-feed
+        </span>
+        <span class="ml-auto hidden font-mono text-[10px] uppercase tracking-[0.2em] text-white/16 sm:block">
+          {entries.length} entries
+        </span>
       </div>
 
-      {
-        entries.map((entry, i) => {
-          const isLeft = i % 2 === 0
-          const body = cleanBody(entry.body)
-          const type = getType(entry.subject)
-          const title = stripPrefix(entry.subject)
+      <ol id="changelog-feed" class="relative divide-y divide-white/[0.045]" aria-label="Recent commits">
+        {
+          entries.map((entry, i) => {
+            const body = cleanBody(entry.body)
+            const type = getType(entry.subject)
+            const title = stripPrefix(entry.subject)
+            const shortHash = entry.hash.slice(0, 7)
+            const index = String(i + 1).padStart(2, '0')
 
-          const card = (
-            <article class="cl-section-card group relative rounded-sm border border-white/[0.06] bg-neutral-950/55 px-5 py-5 backdrop-blur-sm transition-all duration-300 hover:border-amber-400/[0.16] hover:shadow-[0_0_28px_rgba(251,191,36,0.045)] hover:bg-neutral-950/70">
-              {/* Inner top highlight */}
-              <div
-                class="pointer-events-none absolute inset-x-0 top-0 h-px rounded-t-sm"
-                style="background: linear-gradient(to right, transparent, rgba(255,255,255,0.04), transparent);"
-                aria-hidden="true"
-              />
+            return (
+              <li class="changelog-feed-item group relative" data-cl-section-item>
+                <article class="relative grid gap-4 px-4 py-5 sm:grid-cols-[76px_1fr] sm:px-5 md:px-6">
+                  <div class="flex items-start gap-3 sm:block">
+                    <div class="flex items-center gap-2 font-mono text-[10px] text-white/25 sm:mb-4">
+                      <span class="text-white/12">#</span>
+                      <span>{index}</span>
+                    </div>
+                    <div class="cl-node relative flex h-5 w-5 items-center justify-center">
+                      <span class={`absolute h-2.5 w-2.5 rounded-full ${type.dot}`}></span>
+                      <span class="absolute h-5 w-5 rounded-full border border-white/[0.08] bg-white/[0.02]"></span>
+                    </div>
+                  </div>
 
-              {/* Type badge + date */}
-              <div class="flex items-center justify-between gap-3 mb-3">
-                <span
-                  class={`inline-flex items-center rounded-sm border px-2 py-[3px] font-mono text-[10px] font-semibold uppercase tracking-widest ${type.cls}`}
-                >
-                  {type.label}
-                </span>
-                <time datetime={entry.date} class="font-mono text-[11px] text-white/25">
-                  {formatDate(entry.date)}
-                </time>
-              </div>
+                  <div class="min-w-0">
+                    <div class="flex flex-wrap items-center gap-2.5">
+                      <span
+                        class={`inline-flex items-center rounded-sm border px-2 py-[3px] font-mono text-[10px] font-semibold uppercase tracking-widest ${type.cls}`}
+                      >
+                        {type.label}
+                      </span>
+                      <time datetime={entry.date} class="font-mono text-[11px] text-white/28">
+                        {formatDate(entry.date)}
+                      </time>
+                      <span class="hidden font-mono text-[11px] text-white/12 sm:inline">/</span>
+                      <a
+                        href={`${repoBase}/${entry.hash}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="cl-hash font-mono text-[11px] text-amber-400/48 transition-colors duration-200 hover:text-amber-300"
+                        data-hash={shortHash}
+                        aria-label={`View commit ${entry.hash} on GitHub`}
+                      >
+                        {shortHash}
+                      </a>
+                    </div>
 
-              {/* Subject */}
-              <h3 class="break-words text-[14px] font-semibold leading-snug text-neutral-100 tracking-[-0.01em]">
-                {title}
-              </h3>
+                    <h3 class="mt-3 break-words font-mono text-[15px] font-semibold leading-snug text-neutral-100">
+                      <span class="mr-2 text-emerald-400/45">$</span>{title}
+                    </h3>
 
-              {/* Body */}
-              {body && (
-                <div>
-                  <p
-                    class="cl-body-text mt-3 border-t border-white/[0.05] pt-3 font-sans text-[12px] leading-relaxed text-neutral-500 whitespace-pre-line break-words"
-                    style="--cl-lines: 2"
-                    data-body-text
-                  >
-                    {body}
-                  </p>
-                  <button
-                    type="button"
-                    class="read-more-btn mt-2 hidden font-mono text-[10px] text-amber-400/60 transition-colors hover:text-amber-400"
-                    aria-expanded="false"
-                  >
-                    Read more ↓
-                  </button>
-                </div>
-              )}
+                    {body && (
+                      <div class="mt-3">
+                        <p
+                          class="cl-body-text border-l border-white/[0.07] pl-3 font-mono text-[12px] leading-relaxed text-white/36 whitespace-pre-line break-words transition-colors duration-300 group-hover:text-white/48"
+                          style="--cl-lines: 2"
+                          data-body-text
+                        >
+                          {body}
+                        </p>
+                        <button
+                          type="button"
+                          class="read-more-btn mt-2 hidden cursor-pointer font-mono text-[10px] uppercase tracking-[0.18em] text-amber-400/55 transition-colors hover:text-amber-300"
+                          aria-expanded="false"
+                        >
+                          expand log
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </article>
+              </li>
+            )
+          })
+        }
+      </ol>
+    </div>
 
-              {/* Footer: hash */}
-              <div class="mt-4 flex items-center justify-between border-t border-white/[0.04] pt-3">
-                <span class="font-mono text-[10px] text-white/12 tracking-widest">SHA-1</span>
-                <a
-                  href={`${repoBase}/${entry.hash}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="cl-hash font-mono text-[11px] text-neutral-600 hover:text-amber-400 transition-colors duration-200"
-                  data-hash={entry.hash}
-                  aria-label={`View commit ${entry.hash} on GitHub`}
-                >
-                  {entry.hash}
-                </a>
-              </div>
-            </article>
-          )
-
-          return (
-            <li
-              class="relative grid grid-cols-[24px_1fr] md:grid-cols-[1fr_48px_1fr] items-start pb-12 last:pb-0"
-              data-cl-section-item
-            >
-              {/* Node: col 1 on mobile, col 2 on desktop */}
-              <div class="col-start-1 row-start-1 md:col-start-2 relative z-10 flex justify-center pt-[18px]">
-                <div class="cl-node relative flex items-center justify-center">
-                  <div
-                    class="absolute h-5 w-5 rounded-full bg-amber-400/[0.08] animate-pulse"
-                    aria-hidden="true"
-                  />
-                  <div class="relative h-[11px] w-[11px] rounded-full border border-amber-400/55 bg-neutral-950 shadow-[0_0_8px_rgba(251,191,36,0.22)]" />
-                </div>
-              </div>
-
-              {/* Card: col 2 on mobile (always), alternates col 1/3 on desktop */}
-              <div
-                class={`col-start-2 row-start-1 pl-4 md:pl-0 ${isLeft ? 'md:col-start-1 md:col-end-2 md:pr-7' : 'md:col-start-3 md:pl-7'}`}
-              >
-                {card}
-              </div>
-            </li>
-          )
-        })
-      }
-    </ol>
-
-    <!-- "View Full Changelog" button -->
-    <div class="mt-12">
-      <a
-        href="/changelog"
-        class="flex w-full items-center justify-center gap-3 border border-white/[0.07] bg-transparent px-6 py-4 font-mono text-sm text-white/40 transition-all duration-200 hover:border-amber-400/25 hover:text-white/70 hover:shadow-[0_0_20px_rgba(251,191,36,0.04)]"
-      >
-        <span class="text-white/25">$</span>
-        View Full Changelog
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="14"
-          height="14"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          aria-hidden="true"
-        >
-          <path d="M5 12h14" />
-          <path d="m12 5 7 7-7 7" />
-        </svg>
+    <div class="changelog-cta-wrap mt-8">
+      <a href="/changelog" class="changelog-cta group relative flex w-full overflow-hidden rounded-md border border-white/[0.08] bg-neutral-950/35 px-5 py-4 font-mono text-sm text-white/45 transition-all duration-300 hover:border-white/22 hover:text-neutral-950 hover:shadow-[0_0_28px_rgba(255,255,255,0.08)]">
+        <span class="changelog-cta-fill pointer-events-none absolute inset-x-0 bottom-0 h-0 bg-white transition-all duration-400 ease-out group-hover:h-full"></span>
+        <span class="relative flex min-w-0 flex-1 items-center justify-center gap-3">
+          <span class="changelog-cta-symbol text-emerald-400/55 transition-colors duration-300 group-hover:text-neutral-950/72">$</span>
+          <span class="truncate">open /changelog</span>
+          <span class="changelog-cursor text-amber-400/75 transition-colors duration-300 group-hover:text-neutral-950/72">_</span>
+          <svg
+            class="changelog-arrow transition-transform duration-300 group-hover:translate-x-1"
+            xmlns="http://www.w3.org/2000/svg"
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M5 12h14" />
+            <path d="m12 5 7 7-7 7" />
+          </svg>
+        </span>
       </a>
     </div>
   </div>
 </section>
 
 <style>
+  .changelog-grid {
+    background-image:
+      radial-gradient(circle, rgba(255, 255, 255, 0.12) 1px, transparent 1px),
+      linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+    background-size: 44px 44px, 44px 44px, 44px 44px;
+    mask-image: radial-gradient(ellipse at center, black 0%, transparent 72%);
+    opacity: 0.42;
+  }
+
+  .changelog-light {
+    border-radius: 9999px;
+    filter: blur(70px);
+  }
+
+  .changelog-light-a {
+    width: clamp(260px, 38vw, 520px);
+    height: clamp(260px, 38vw, 520px);
+    top: 6%;
+    right: -8%;
+    background: radial-gradient(circle closest-side, rgba(255, 255, 255, 0.07), transparent);
+  }
+
+  .changelog-light-b {
+    width: clamp(220px, 32vw, 440px);
+    height: clamp(220px, 32vw, 440px);
+    bottom: 4%;
+    left: -10%;
+    background: radial-gradient(circle closest-side, rgba(52, 211, 153, 0.055), transparent);
+  }
+
+  .changelog-scanline {
+    background: linear-gradient(
+      to bottom,
+      transparent,
+      rgba(255, 255, 255, 0.06),
+      transparent
+    );
+    height: 38%;
+    transform: translateY(-120%);
+  }
+
+  .changelog-feed-item:hover .cl-node {
+    filter: drop-shadow(0 0 16px rgba(251, 191, 36, 0.38));
+  }
+
   .cl-body-text:not([data-expanded='true']) {
     display: -webkit-box;
     -webkit-line-clamp: var(--cl-lines, 2);
     -webkit-box-orient: vertical;
     overflow: hidden;
+  }
+
+  .changelog-cursor {
+    animation: changelog-cursor-blink 1.05s step-end infinite;
+  }
+
+  .changelog-cta::before,
+  .changelog-cta::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.42), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .changelog-cta::before {
+    top: 0;
+  }
+
+  .changelog-cta::after {
+    bottom: 0;
+  }
+
+  .changelog-cta:hover::before,
+  .changelog-cta:hover::after {
+    opacity: 1;
+  }
+
+  @keyframes changelog-cursor-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .changelog-cursor {
+      animation: none;
+    }
   }
 </style>
 
@@ -223,45 +321,28 @@ function stripPrefix(s: string): string {
 
   const section = document.getElementById('changelog')!
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
-  // Background vignette parallax
-  if (!reduceMotion) {
-    gsap.to(section.querySelector('.changelog-bg'), {
-      yPercent: -25,
-      ease: 'none',
-      scrollTrigger: {
-        trigger: section,
-        start: 'top bottom',
-        end: 'bottom top',
-        scrub: 1,
-      },
-    })
-
-    gsap.to(section.querySelector('.changelog-spine-progress'), {
-      scaleY: 1,
-      ease: 'none',
-      scrollTrigger: {
-        trigger: '#changelog-list',
-        start: 'top 72%',
-        end: 'bottom 68%',
-        scrub: true,
-      },
-    })
-  } else {
-    gsap.set(section.querySelector('.changelog-spine-progress'), { scaleY: 1 })
-  }
+  const header = section.querySelector<HTMLElement>('.changelog-header')
+  const terminal = section.querySelector<HTMLElement>('.changelog-terminal')
+  const entries = section.querySelectorAll<HTMLElement>('[data-cl-section-item]')
+  const cta = section.querySelector<HTMLElement>('.changelog-cta-wrap')
+  const bgLights = section.querySelectorAll<HTMLElement>('.changelog-light')
+  const scanline = section.querySelector<HTMLElement>('.changelog-scanline')
 
   function scrambleHash(el: HTMLElement) {
     const final = el.dataset.hash ?? el.textContent ?? ''
     const glyphs = '0123456789abcdef'
     let frame = 0
-    const maxFrames = 14
+    const maxFrames = 12
 
     const tick = () => {
       frame += 1
       el.textContent = final
         .split('')
-        .map((char, i) => (i < Math.floor((frame / maxFrames) * final.length) ? char : glyphs[Math.floor(Math.random() * glyphs.length)]))
+        .map((char, i) =>
+          i < Math.floor((frame / maxFrames) * final.length)
+            ? char
+            : glyphs[Math.floor(Math.random() * glyphs.length)],
+        )
         .join('')
 
       if (frame < maxFrames) {
@@ -274,55 +355,66 @@ function stripPrefix(s: string): string {
     tick()
   }
 
-  document.querySelectorAll<HTMLElement>('[data-cl-section-item]').forEach((item, i) => {
-    const card = item.querySelector<HTMLElement>('.cl-section-card')
-    const node = item.querySelector<HTMLElement>('.cl-node')
-    const hash = item.querySelector<HTMLElement>('.cl-hash')
-    if (!card) return
-
-    // Entry reveal
+  if (reduceMotion) {
+    gsap.set([header, terminal, entries, cta], { autoAlpha: 1, y: 0 })
+  } else {
     gsap.fromTo(
-      card,
+      [header, terminal, ...entries, cta].filter(Boolean),
       { autoAlpha: 0, y: 22 },
       {
         autoAlpha: 1,
         y: 0,
         duration: 0.65,
         ease: 'power3.out',
-        scrollTrigger: {
-          trigger: item,
-          start: 'top 88%',
-          onEnter: () => {
-            if (!reduceMotion && hash && !hash.dataset.scrambled) {
-              hash.dataset.scrambled = 'true'
-              scrambleHash(hash)
-            }
-            if (!reduceMotion && node) {
-              gsap.fromTo(
-                node,
-                { scale: 0.72, filter: 'drop-shadow(0 0 0 rgba(251,191,36,0))' },
-                { scale: 1, filter: 'drop-shadow(0 0 18px rgba(251,191,36,0.55))', duration: 0.42, ease: 'back.out(1.7)' },
-              )
-            }
-          },
-        },
+        stagger: 0.08,
+        scrollTrigger: { trigger: section, start: 'top 78%' },
       },
     )
 
-    // Staggered scroll-depth parallax — alternating sides drift at different speeds
-    const isLeft = i % 2 === 0
-    if (!reduceMotion) {
-      gsap.to(card, {
-        yPercent: isLeft ? -10 : -5,
+    if (scanline) {
+      gsap.to(scanline, {
+        opacity: 1,
+        yPercent: 320,
         ease: 'none',
         scrollTrigger: {
-          trigger: item,
-          start: 'top bottom',
-          end: 'bottom top',
-          scrub: isLeft ? 2 : 1.2,
+          trigger: terminal,
+          start: 'top 82%',
+          end: 'bottom 48%',
+          scrub: 1.5,
         },
       })
     }
+
+    bgLights.forEach((light, i) => {
+      gsap.to(light, {
+        yPercent: i === 0 ? -24 : -14,
+        xPercent: i === 0 ? -4 : 6,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: section,
+          start: 'top bottom',
+          end: 'bottom top',
+          scrub: i === 0 ? 1.4 : 2,
+        },
+      })
+    })
+  }
+
+  entries.forEach((item) => {
+    const hash = item.querySelector<HTMLElement>('.cl-hash')
+    const node = item.querySelector<HTMLElement>('.cl-node')
+
+    item.addEventListener('mouseenter', () => {
+      if (reduceMotion) return
+      if (hash) scrambleHash(hash)
+      if (node) {
+        gsap.fromTo(
+          node,
+          { scale: 0.9 },
+          { scale: 1, duration: 0.45, ease: 'back.out(1.8)', overwrite: 'auto' },
+        )
+      }
+    })
   })
 
   function setupExpandableBodies() {
@@ -332,7 +424,7 @@ function stripPrefix(s: string): string {
 
       const expanded = btn.getAttribute('aria-expanded') === 'true'
       p.dataset.expanded = String(expanded)
-      btn.textContent = expanded ? 'Read less ↑' : 'Read more ↓'
+      btn.textContent = expanded ? 'collapse log' : 'expand log'
 
       const overflows = p.scrollHeight > p.clientHeight + 1
       btn.classList.toggle('hidden', !expanded && !overflows)
@@ -343,7 +435,7 @@ function stripPrefix(s: string): string {
           const nextExpanded = btn.getAttribute('aria-expanded') !== 'true'
           btn.setAttribute('aria-expanded', String(nextExpanded))
           p.dataset.expanded = String(nextExpanded)
-          btn.textContent = nextExpanded ? 'Read less ↑' : 'Read more ↓'
+          btn.textContent = nextExpanded ? 'collapse log' : 'expand log'
           btn.classList.remove('hidden')
         })
       }

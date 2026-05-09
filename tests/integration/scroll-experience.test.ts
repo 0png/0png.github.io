@@ -41,9 +41,13 @@ describe('scroll experience upgrade', () => {
     expect(projects).toContain('xPercent')
   })
 
-  it('animates the changelog spine and commit hashes', () => {
-    expect(changelog).toContain('changelog-spine-progress')
+  it('renders the homepage changelog as an animated terminal feed', () => {
+    expect(changelog).toContain('changelog-terminal')
+    expect(changelog).toContain('changelog-feed')
+    expect(changelog).toContain('changelog-scanline')
+    expect(changelog).not.toContain('rgba(88,28,135')
     expect(changelog).toContain('scrambleHash')
+    expect(changelog).toContain('open /changelog')
   })
 
   it('prevents document-level horizontal scrolling from wide pinned scenes', () => {

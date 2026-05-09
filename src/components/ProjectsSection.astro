@@ -87,25 +87,29 @@ const placeholderCount = Math.max(0, MAX - displayed.length)
   <div class="px-8 pb-16 md:px-16">
     <a
       href="/projects"
-      class="flex w-full items-center justify-center gap-3 rounded-xl border border-neutral-700 bg-transparent px-6 py-4 font-mono text-sm text-white/50 transition-colors hover:border-neutral-500 hover:text-white/80"
+      class="projects-cta group relative flex w-full overflow-hidden rounded-xl border border-white/[0.08] bg-neutral-950/35 px-6 py-4 font-mono text-sm text-white/45 transition-all duration-300 hover:border-white/22 hover:text-neutral-950 hover:shadow-[0_0_28px_rgba(255,255,255,0.08)]"
     >
-      <span class="text-white/30">$</span>
-      View All Projects
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="14"
-        height="14"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        aria-hidden="true"
-      >
-        <path d="M5 12h14" />
-        <path d="m12 5 7 7-7 7" />
-      </svg>
+      <span class="projects-cta-fill pointer-events-none absolute inset-x-0 bottom-0 h-0 bg-white transition-all duration-400 ease-out group-hover:h-full"></span>
+      <span class="relative flex min-w-0 flex-1 items-center justify-center gap-3">
+        <span class="projects-cta-symbol text-white/30 transition-colors duration-300 group-hover:text-neutral-950/72">$</span>
+        <span class="truncate">View All Projects</span>
+        <svg
+          class="projects-cta-arrow transition-transform duration-300 group-hover:translate-x-1"
+          xmlns="http://www.w3.org/2000/svg"
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M5 12h14" />
+          <path d="m12 5 7 7-7 7" />
+        </svg>
+      </span>
     </a>
   </div>
 </section>
@@ -125,6 +129,30 @@ const placeholderCount = Math.max(0, MAX - displayed.length)
       height: 100%;
       min-height: 520px;
     }
+  }
+
+  .projects-cta::before,
+  .projects-cta::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.42), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .projects-cta::before {
+    top: 0;
+  }
+
+  .projects-cta::after {
+    bottom: 0;
+  }
+
+  .projects-cta:hover::before,
+  .projects-cta:hover::after {
+    opacity: 1;
   }
 
   @media (prefers-reduced-motion: reduce) {
