@@ -11,8 +11,6 @@ interface Props {
   activityLog?: ActivityLogEntry[]
   discord: string
   email: string
-  githubUrl: string
-  github: string
 }
 
 // Opacity for each intensity level (green-scale)
@@ -56,7 +54,7 @@ function Sep() {
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export default function ContactDashboard({ activityLog = [], discord, email, githubUrl, github }: Props) {
+export default function ContactDashboard({ activityLog = [], discord, email }: Props) {
   const [logTooltip, setLogTooltip] = useState<{
     entry: ActivityLogEntry
     // Fixed viewport coords derived from getBoundingClientRect — stable across scroll/layout shifts
