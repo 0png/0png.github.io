@@ -7,9 +7,10 @@ interface Props {
   title: string
   description?: string
   image?: string
+  showBoot?: boolean
 }
 
-const { title, description } = Astro.props
+const { title, description, showBoot = false } = Astro.props
 const image = Astro.props.image ?? '/og-image.png'
 const canonicalUrl = Astro.url.href
 const siteUrl = Astro.site?.origin ?? 'https://0png.github.io'
@@ -211,24 +212,48 @@ const ogImage = image.startsWith('http') ? image : `${siteUrl}${image}`
     </style>
   </head>
   <body>
-    <div id="site-boot" class="terminal-palette" aria-live="polite" aria-label="Loading 0PNG">
-      <div class="boot-panel bg-neutral-950">
-        <div class="boot-chrome">
-          <span class="boot-dot boot-dot-red" aria-hidden="true"></span>
-          <span class="boot-dot boot-dot-yellow" aria-hidden="true"></span>
-          <span class="boot-dot boot-dot-green" aria-hidden="true"></span>
-          <span class="boot-title">~/0png — boot</span>
-          <span class="ml-auto text-white/20">init</span>
+    {
+      showBoot && (
+        <div id="site-boot" class="terminal-palette" aria-live="polite" aria-label="Loading 0PNG">
+          <div class="boot-panel bg-neutral-950">
+            <div class="boot-chrome">
+              <span class="boot-dot boot-dot-red" aria-hidden="true" />
+              <span class="boot-dot boot-dot-yellow" aria-hidden="true" />
+              <span class="boot-dot boot-dot-green" aria-hidden="true" />
+              <span class="boot-title">~/0png — boot</span>
+              <span class="ml-auto text-white/20">init</span>
+            </div>
+            <div class="boot-lines">
+              <div class="boot-line">
+                <span>
+                  <span class="text-white/25">$</span> boot 0PNG.dev
+                </span>
+                <span class="boot-ok">done</span>
+              </div>
+              <div class="boot-line">
+                <span>
+                  <span class="text-white/25">$</span> mount /about /projects /changelog
+                </span>
+                <span class="boot-ok">done</span>
+              </div>
+              <div class="boot-line">
+                <span>
+                  <span class="text-white/25">$</span> read github_activity.cache
+                </span>
+                <span class="boot-ok">done</span>
+              </div>
+              <div class="boot-line">
+                <span>
+                  <span class="text-white/25">$</span> launch interface
+                </span>
+                <span class="boot-ok">ready</span>
+              </div>
+            </div>
+            <div class="boot-progress" aria-hidden="true" />
+          </div>
         </div>
-        <div class="boot-lines">
-          <div class="boot-line"><span><span class="text-white/25">$</span> boot 0PNG.dev</span><span class="boot-ok">done</span></div>
-          <div class="boot-line"><span><span class="text-white/25">$</span> mount /about /projects /changelog</span><span class="boot-ok">done</span></div>
-          <div class="boot-line"><span><span class="text-white/25">$</span> read github_activity.cache</span><span class="boot-ok">done</span></div>
-          <div class="boot-line"><span><span class="text-white/25">$</span> launch interface</span><span class="boot-ok">ready</span></div>
-        </div>
-        <div class="boot-progress" aria-hidden="true"></div>
-      </div>
-    </div>
+      )
+    }
 
     <!-- Mobile notice — hidden by default, revealed by JS on touch devices -->
     <div id="mobile-notice" aria-live="polite" hidden>

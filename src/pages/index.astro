@@ -16,7 +16,7 @@ const featuredProjects = projects
   .sort((a, b) => a.order - b.order)
 ---
 
-<BaseLayout title={siteConfig.name} description={siteConfig.bio}>
+<BaseLayout title={siteConfig.name} description={siteConfig.bio} showBoot>
   <Hero headline={siteConfig.headline} />
   <About bio={siteConfig.bio} />
   <Marquee items={techStack} />

@@ -27,7 +27,7 @@ const LOG_OPACITIES: Record<number, number> = {
 // Mirrors the Changelog's center node exactly
 function SpineNode() {
   return (
-    <div className="absolute z-10 flex items-center justify-center" style={{ left: 14, top: 18 }}>
+    <div className="absolute z-10 flex h-5 w-5 items-center justify-center" style={{ left: 14, top: 18 }}>
       <div className="absolute h-5 w-5 rounded-full bg-emerald-400/[0.08] animate-pulse" />
       <div
         className="relative h-[11px] w-[11px] rounded-full bg-neutral-950"

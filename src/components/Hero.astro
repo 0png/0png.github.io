@@ -63,7 +63,7 @@ const words = headline.split(' ')
 
     <!-- Headline with per-word clip reveal -->
     <h1
-      class="text-balance font-black leading-[0.92] tracking-tighter text-foreground"
+      class="hero-heading text-balance font-black leading-[0.92] tracking-tighter text-foreground"
       style="font-size: clamp(3rem, 9.5vw, 7.5rem);"
     >
       {
@@ -266,6 +266,7 @@ const words = headline.split(' ')
   const hero = document.getElementById('hero')!
   const spotlight = hero.querySelector<HTMLElement>('.hero-spotlight')!
   const badge = hero.querySelector<HTMLElement>('.hero-badge')!
+  const heading = hero.querySelector<HTMLElement>('.hero-heading')!
   const words = hero.querySelectorAll<HTMLElement>('.hero-word')
   const rule = hero.querySelector<HTMLElement>('.hero-rule')!
   const trigger = hero.querySelector<HTMLElement>('.hero-trigger')!
@@ -414,10 +415,11 @@ const words = headline.split(' ')
           anticipatePin: 1,
         },
       })
-      .to(content, { yPercent: -34, scale: 0.94, filter: 'blur(3px)', opacity: 0.2 }, 0)
+      .to(content, { yPercent: -34, scale: 0.94 }, 0)
+      .to([badge, heading], { filter: 'blur(3px)', opacity: 0.2 }, 0)
       .to(words, { yPercent: -18, stagger: 0.02 }, 0)
       .to(rule, { scaleX: 0.35, opacity: 0 }, 0)
-      .to(trigger, { yPercent: -40, opacity: 0 }, 0)
+      .to(trigger, { yPercent: -16 }, 0)
       .to(indicator, { yPercent: -90, opacity: 0 }, 0)
       .to(scrollLine, { scaleY: 0, opacity: 0 }, 0)
       .to(dots, { yPercent: -26, opacity: 0.25 }, 0)
