@@ -18,11 +18,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
       - run: npm ci
+      - name: Generate changelog
+        run: node scripts/generate-changelog.js
       - run: npm run build
         env:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}

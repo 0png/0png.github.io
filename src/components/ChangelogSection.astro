@@ -52,7 +52,7 @@ function stripPrefix(s: string): string {
 >
   <!-- Section-scoped vignette (non-fixed, relative to section) -->
   <div
-    class="pointer-events-none absolute inset-0 z-0"
+    class="changelog-bg pointer-events-none absolute inset-0 z-0"
     style="background: radial-gradient(ellipse 60% 50% at 100% 100%, rgba(88,28,135,0.08) 0%, transparent 65%);"
     aria-hidden="true"
   >
@@ -73,10 +73,11 @@ function stripPrefix(s: string): string {
     <ol id="changelog-list" class="relative" aria-label="Recent commits">
       <!-- Vertical spine: left-aligned on mobile, centered on desktop -->
       <div
-        class="absolute left-3 md:left-1/2 top-0 bottom-0 w-px md:-translate-x-px"
+        class="absolute left-3 md:left-1/2 top-0 bottom-0 w-px overflow-hidden md:-translate-x-px"
         style="background: linear-gradient(to bottom, transparent 0%, rgba(251,191,36,0.14) 10%, rgba(251,191,36,0.14) 90%, transparent 100%);"
         aria-hidden="true"
       >
+        <div class="changelog-spine-progress absolute inset-x-0 top-0 h-full origin-top scale-y-0 bg-gradient-to-b from-transparent via-amber-400/70 to-transparent shadow-[0_0_18px_rgba(251,191,36,0.45)]"></div>
       </div>
 
       {
@@ -108,19 +109,23 @@ function stripPrefix(s: string): string {
               </div>
 
               {/* Subject */}
-              <h3 class="text-[14px] font-semibold leading-snug text-neutral-100 tracking-[-0.01em]">
+              <h3 class="break-words text-[14px] font-semibold leading-snug text-neutral-100 tracking-[-0.01em]">
                 {title}
               </h3>
 
               {/* Body */}
               {body && (
                 <div>
-                  <p class="mt-3 border-t border-white/[0.05] pt-3 text-[12px] leading-relaxed text-neutral-500 whitespace-pre-line font-sans" data-body-text>
+                  <p
+                    class="cl-body-text mt-3 border-t border-white/[0.05] pt-3 font-sans text-[12px] leading-relaxed text-neutral-500 whitespace-pre-line break-words"
+                    style="--cl-lines: 2"
+                    data-body-text
+                  >
                     {body}
                   </p>
                   <button
                     type="button"
-                    class="read-more-btn hidden mt-2 font-mono text-[10px] text-amber-400/60 hover:text-amber-400 transition-colors md:hidden"
+                    class="read-more-btn mt-2 hidden font-mono text-[10px] text-amber-400/60 transition-colors hover:text-amber-400"
                     aria-expanded="false"
                   >
                     Read more ↓
@@ -135,7 +140,8 @@ function stripPrefix(s: string): string {
                   href={`${repoBase}/${entry.hash}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="font-mono text-[11px] text-neutral-600 hover:text-amber-400 transition-colors duration-200"
+                  class="cl-hash font-mono text-[11px] text-neutral-600 hover:text-amber-400 transition-colors duration-200"
+                  data-hash={entry.hash}
                   aria-label={`View commit ${entry.hash} on GitHub`}
                 >
                   {entry.hash}
@@ -151,7 +157,7 @@ function stripPrefix(s: string): string {
             >
               {/* Node: col 1 on mobile, col 2 on desktop */}
               <div class="col-start-1 row-start-1 md:col-start-2 relative z-10 flex justify-center pt-[18px]">
-                <div class="relative flex items-center justify-center">
+                <div class="cl-node relative flex items-center justify-center">
                   <div
                     class="absolute h-5 w-5 rounded-full bg-amber-400/[0.08] animate-pulse"
                     aria-hidden="true"
@@ -200,26 +206,78 @@ function stripPrefix(s: string): string {
   </div>
 </section>
 
+<style>
+  .cl-body-text:not([data-expanded='true']) {
+    display: -webkit-box;
+    -webkit-line-clamp: var(--cl-lines, 2);
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>
+
 <script>
   import gsap from 'gsap'
   import ScrollTrigger from 'gsap/ScrollTrigger'
 
   gsap.registerPlugin(ScrollTrigger)
 
+  const section = document.getElementById('changelog')!
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
   // Background vignette parallax
-  gsap.to('#changelog .pointer-events-none', {
-    yPercent: -25,
-    ease: 'none',
-    scrollTrigger: {
-      trigger: '#changelog',
-      start: 'top bottom',
-      end: 'bottom top',
-      scrub: 1,
-    },
-  })
+  if (!reduceMotion) {
+    gsap.to(section.querySelector('.changelog-bg'), {
+      yPercent: -25,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: section,
+        start: 'top bottom',
+        end: 'bottom top',
+        scrub: 1,
+      },
+    })
+
+    gsap.to(section.querySelector('.changelog-spine-progress'), {
+      scaleY: 1,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: '#changelog-list',
+        start: 'top 72%',
+        end: 'bottom 68%',
+        scrub: true,
+      },
+    })
+  } else {
+    gsap.set(section.querySelector('.changelog-spine-progress'), { scaleY: 1 })
+  }
+
+  function scrambleHash(el: HTMLElement) {
+    const final = el.dataset.hash ?? el.textContent ?? ''
+    const glyphs = '0123456789abcdef'
+    let frame = 0
+    const maxFrames = 14
+
+    const tick = () => {
+      frame += 1
+      el.textContent = final
+        .split('')
+        .map((char, i) => (i < Math.floor((frame / maxFrames) * final.length) ? char : glyphs[Math.floor(Math.random() * glyphs.length)]))
+        .join('')
+
+      if (frame < maxFrames) {
+        window.requestAnimationFrame(tick)
+      } else {
+        el.textContent = final
+      }
+    }
+
+    tick()
+  }
 
   document.querySelectorAll<HTMLElement>('[data-cl-section-item]').forEach((item, i) => {
     const card = item.querySelector<HTMLElement>('.cl-section-card')
+    const node = item.querySelector<HTMLElement>('.cl-node')
+    const hash = item.querySelector<HTMLElement>('.cl-hash')
     if (!card) return
 
     // Entry reveal
@@ -234,68 +292,64 @@ function stripPrefix(s: string): string {
         scrollTrigger: {
           trigger: item,
           start: 'top 88%',
+          onEnter: () => {
+            if (!reduceMotion && hash && !hash.dataset.scrambled) {
+              hash.dataset.scrambled = 'true'
+              scrambleHash(hash)
+            }
+            if (!reduceMotion && node) {
+              gsap.fromTo(
+                node,
+                { scale: 0.72, filter: 'drop-shadow(0 0 0 rgba(251,191,36,0))' },
+                { scale: 1, filter: 'drop-shadow(0 0 18px rgba(251,191,36,0.55))', duration: 0.42, ease: 'back.out(1.7)' },
+              )
+            }
+          },
         },
       },
     )
 
     // Staggered scroll-depth parallax — alternating sides drift at different speeds
     const isLeft = i % 2 === 0
-    gsap.to(card, {
-      yPercent: isLeft ? -10 : -5,
-      ease: 'none',
-      scrollTrigger: {
-        trigger: item,
-        start: 'top bottom',
-        end: 'bottom top',
-        scrub: isLeft ? 2 : 1.2,
-      },
-    })
+    if (!reduceMotion) {
+      gsap.to(card, {
+        yPercent: isLeft ? -10 : -5,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: item,
+          start: 'top bottom',
+          end: 'bottom top',
+          scrub: isLeft ? 2 : 1.2,
+        },
+      })
+    }
   })
 
-  // Read More for mobile body text
-  const MOBILE_CHARS = 100
-
-  function setupReadMore() {
-    const isMobile = window.innerWidth < 768
-
+  function setupExpandableBodies() {
     document.querySelectorAll<HTMLElement>('[data-body-text]').forEach((p) => {
-      // Store the original text once
-      if (!p.dataset.full) {
-        p.dataset.full = p.textContent ?? ''
-      }
-      const fullText = p.dataset.full
       const btn = p.nextElementSibling as HTMLButtonElement | null
       if (!btn?.classList.contains('read-more-btn')) return
 
-      if (!isMobile || fullText.length <= MOBILE_CHARS) {
-        p.textContent = fullText
-        btn.classList.add('hidden')
-        return
-      }
+      const expanded = btn.getAttribute('aria-expanded') === 'true'
+      p.dataset.expanded = String(expanded)
+      btn.textContent = expanded ? 'Read less ↑' : 'Read more ↓'
 
-      // Truncate at first newline or MOBILE_CHARS, whichever is shorter
-      const firstNewline = fullText.indexOf('\n')
-      const cutAt = firstNewline > 0 && firstNewline < MOBILE_CHARS ? firstNewline : MOBILE_CHARS
-      const truncated = fullText.slice(0, cutAt).trimEnd() + '…'
+      const overflows = p.scrollHeight > p.clientHeight + 1
+      btn.classList.toggle('hidden', !expanded && !overflows)
 
-      const isExpanded = btn.getAttribute('aria-expanded') === 'true'
-      p.textContent = isExpanded ? fullText : truncated
-      btn.textContent = isExpanded ? 'Read less ↑' : 'Read more ↓'
-      btn.classList.remove('hidden')
-
-      // Only attach onclick once
       if (!btn.dataset.bound) {
         btn.dataset.bound = '1'
         btn.addEventListener('click', () => {
-          const expanded = btn.getAttribute('aria-expanded') !== 'true'
-          btn.setAttribute('aria-expanded', String(expanded))
-          p.textContent = expanded ? fullText : truncated
-          btn.textContent = expanded ? 'Read less ↑' : 'Read more ↓'
+          const nextExpanded = btn.getAttribute('aria-expanded') !== 'true'
+          btn.setAttribute('aria-expanded', String(nextExpanded))
+          p.dataset.expanded = String(nextExpanded)
+          btn.textContent = nextExpanded ? 'Read less ↑' : 'Read more ↓'
+          btn.classList.remove('hidden')
         })
       }
     })
   }
 
-  setupReadMore()
-  window.addEventListener('resize', setupReadMore, { passive: true })
+  setupExpandableBodies()
+  window.addEventListener('resize', setupExpandableBodies, { passive: true })
 </script>
