@@ -1,5 +1,11 @@
 [
   {
+    "date": "2026-05-09",
+    "subject": "chore: stabilize Windows project setup",
+    "body": "",
+    "hash": "221b0fe"
+  },
+  {
     "date": "2026-03-10",
     "subject": "fix: restrict mobile notice to mobile devices only",
     "body": "",
@@ -52,11 +58,5 @@
     "subject": "feat: add smart sticky navbar and fix projects page layout",
     "body": "- Add Navbar component with smart hide/show on scroll (rAF-based),\n  glassmorphism backdrop, terminal-style [ LINK ] formatting, pinging\n  status indicator, and GSAP entrance animation\n- Mount Navbar globally via BaseLayout\n- Add [HOME], [ABOUT], [PROJECTS] links; PROJECTS anchors to /#projects\n- Add id=\"projects\" to ProjectsSection for anchor navigation\n- Fix /projects back button z-index conflict by converting from fixed to\n  inline breadcrumb with proper pt offset\n- Add Footer to /projects standalone page and BlogLayout (devlog pages)",
     "hash": "aa3a3d0"
-  },
-  {
-    "date": "2026-03-08",
-    "subject": "feat: simplify ProjectsSection animation and add back-link to projects page",
-    "body": "- Replace all parallax logic with a simple GSAP fade-up stagger on scroll\n- Clean up ProjectCard: remove cover-parallax classes and will-change-transform\n- Remove unused ScrollTrigger import from ProjectsSection\n- Add fixed terminal-style back link (← ~/home) to /projects/index.astro",
-    "hash": "a4dd05b"
   }
 ]
