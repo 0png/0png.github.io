@@ -123,21 +123,35 @@ const navLinks = [
   const navbar = document.getElementById('navbar') as HTMLElement
 
   // ── 1. Entrance animation ─────────────────────────────────────────────────
-  gsap.fromTo(
-    navbar,
-    { y: -20, opacity: 0 },
-    {
-      y: 0,
-      opacity: 1,
-      duration: 0.55,
-      ease: 'power2.out',
-      delay: 0.15,
-      clearProps: 'all',
-      onComplete: () => {
-        navbar.classList.add('nav-entrance-done', 'nav-visible')
+  let navEntranceStarted = false
+
+  function startNavbarEntrance() {
+    if (navEntranceStarted) return
+    navEntranceStarted = true
+
+    gsap.fromTo(
+      navbar,
+      { y: -20, opacity: 0 },
+      {
+        y: 0,
+        opacity: 1,
+        duration: 0.55,
+        ease: 'power2.out',
+        delay: 0.08,
+        clearProps: 'all',
+        onComplete: () => {
+          navbar.classList.add('nav-entrance-done', 'nav-visible')
+        },
       },
-    },
-  )
+    )
+  }
+
+  if (document.documentElement.dataset.siteReady === 'true') {
+    startNavbarEntrance()
+  } else {
+    window.addEventListener('site-ready', startNavbarEntrance, { once: true })
+    window.setTimeout(startNavbarEntrance, 2200)
+  }
 
   // ── 2. Smart hide/show on scroll ──────────────────────────────────────────
   let lastScrollY = 0

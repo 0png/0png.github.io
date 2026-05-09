@@ -13,60 +13,74 @@ const displayed = projects.slice(0, MAX)
 const placeholderCount = Math.max(0, MAX - displayed.length)
 ---
 
-<section id="projects" class="relative" aria-label="Projects">
-  <!-- Section header -->
-  <div class="px-8 pb-8 pt-16 md:px-16">
-    <p class="font-mono text-xs uppercase tracking-[0.3em] text-white/30">
-      Selected work
-    </p>
-    <h2 class="mt-2 text-3xl font-bold tracking-tight text-foreground md:text-4xl">
-      Projects
-    </h2>
-  </div>
+<section id="projects" class="relative overflow-hidden" aria-label="Projects">
+  <div id="projects-stage" class="relative md:min-h-screen">
+    <!-- Section header -->
+    <div class="projects-header px-8 pb-8 pt-16 md:px-16 md:pt-24">
+      <p class="font-mono text-xs uppercase tracking-[0.3em] text-white/30">
+        Selected work
+      </p>
+      <h2 class="mt-2 text-3xl font-bold tracking-tight text-foreground md:text-4xl">
+        Projects
+      </h2>
+      <p class="mt-3 max-w-2xl font-mono text-xs leading-relaxed text-white/25 md:hidden">
+        $ scroll project_stack
+      </p>
+    </div>
 
-  <!-- 6-slot grid -->
-  <div id="projects-grid" class="grid grid-cols-1 gap-6 px-8 pb-8 md:grid-cols-2 md:px-16 lg:grid-cols-3">
-    {displayed.map((project) => <ProjectCard project={project} />)}
-
-    {
-      Array.from({ length: placeholderCount }).map((_, i) => (
-        <div
-          aria-hidden="true"
-          class="flex w-full flex-col overflow-hidden rounded-2xl border border-dashed border-white/[0.08] bg-card"
-        >
-          <div class="relative h-52 overflow-hidden">
-            <div
-              class="absolute inset-0"
-              style="background: radial-gradient(ellipse 80% 60% at 30% 40%, rgba(255,255,255,0.02) 0%, transparent 70%);"
-            />
-            <span
-              class="pointer-events-none absolute bottom-3 right-4 select-none font-mono font-black leading-none tracking-tighter text-white/[0.04]"
-              style="font-size: clamp(5rem, 10vw, 7rem);"
-            >
-              {String(displayed.length + i + 1).padStart(2, '0')}
-            </span>
-            <div
-              class="absolute inset-x-0 bottom-0 h-16"
-              style="background: linear-gradient(to top, hsl(var(--card)), transparent);"
-            />
-          </div>
-
-          <div class="flex flex-1 flex-col gap-4 p-6">
-            <div class="flex flex-wrap gap-1.5">
-              <span class="inline-flex items-center rounded-full border border-white/[0.06] px-2.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-widest text-white/20">
-                coming soon
-              </span>
-            </div>
-            <div class="flex-1 space-y-2">
-              <p class="font-mono text-sm text-white/20">_______________________</p>
-              <p class="font-mono text-xs leading-relaxed text-white/15">
-                $ next project loading...
-              </p>
-            </div>
-          </div>
+    <!-- 6-slot responsive showcase -->
+    <div
+      id="projects-rail"
+      class="project-rail grid grid-cols-1 gap-6 px-8 pb-8 md:flex md:w-max md:grid-cols-none md:items-stretch md:gap-8 md:px-16 md:pb-16"
+    >
+      {displayed.map((project) => (
+        <div class="project-slot md:w-[min(72vw,460px)]">
+          <ProjectCard project={project} />
         </div>
-      ))
-    }
+      ))}
+
+      {
+        Array.from({ length: placeholderCount }).map((_, i) => (
+          <div class="project-slot md:w-[min(72vw,460px)]">
+            <div
+              aria-hidden="true"
+              class="project-card group flex h-full w-full flex-col overflow-hidden rounded-2xl border border-dashed border-white/[0.08] bg-card"
+            >
+              <div class="relative h-52 overflow-hidden">
+                <div
+                  class="project-cover absolute inset-0"
+                  style="background: radial-gradient(ellipse 80% 60% at 30% 40%, rgba(255,255,255,0.03) 0%, transparent 70%);"
+                />
+                <span
+                  class="project-year pointer-events-none absolute bottom-3 right-4 select-none font-mono font-black leading-none tracking-tighter text-white/[0.04]"
+                  style="font-size: clamp(5rem, 10vw, 7rem);"
+                >
+                  {String(displayed.length + i + 1).padStart(2, '0')}
+                </span>
+                <div
+                  class="absolute inset-x-0 bottom-0 h-16"
+                  style="background: linear-gradient(to top, hsl(var(--card)), transparent);"
+                />
+              </div>
+
+              <div class="card-inner flex flex-1 flex-col gap-4 p-6">
+                <div class="flex flex-wrap gap-1.5">
+                  <span class="project-tag inline-flex items-center rounded-full border border-white/[0.06] px-2.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-widest text-white/20">
+                    coming soon
+                  </span>
+                </div>
+                <div class="flex-1 space-y-2">
+                  <p class="project-title font-mono text-sm text-white/20">_______________________</p>
+                  <p class="project-excerpt font-mono text-xs leading-relaxed text-white/15">
+                    $ next project loading...
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))
+      }
+    </div>
   </div>
 
   <!-- "View All" button -->
@@ -96,25 +110,137 @@ const placeholderCount = Math.max(0, MAX - displayed.length)
   </div>
 </section>
 
+<style>
+  .project-rail {
+    will-change: transform;
+  }
+
+  @media (min-width: 768px) {
+    .project-slot {
+      flex: 0 0 auto;
+    }
+
+    .project-slot > :global(.project-card),
+    .project-slot .project-card {
+      height: 100%;
+      min-height: 520px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .project-rail {
+      transform: none !important;
+    }
+  }
+</style>
+
 <script>
   import gsap from 'gsap'
   import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
   gsap.registerPlugin(ScrollTrigger)
 
-  const grid = document.getElementById('projects-grid')
-  if (grid) {
+  const section = document.getElementById('projects')!
+  const stage = document.getElementById('projects-stage')!
+  const rail = document.getElementById('projects-rail')!
+  const slots = gsap.utils.toArray<HTMLElement>('.project-slot', rail)
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+  function revealCards() {
     gsap.fromTo(
-      Array.from(grid.children),
-      { opacity: 0, y: 40 },
+      slots,
+      { autoAlpha: 0, y: 40, xPercent: 8 },
       {
-        opacity: 1,
+        autoAlpha: 1,
         y: 0,
-        duration: 0.6,
-        ease: 'power2.out',
-        stagger: 0.1,
-        scrollTrigger: { trigger: grid, start: 'top 80%' },
+        xPercent: 0,
+        duration: 0.72,
+        ease: 'power3.out',
+        stagger: 0.09,
+        scrollTrigger: { trigger: rail, start: 'top 82%' },
       },
     )
+  }
+
+  if (reduceMotion) {
+    gsap.set(slots, { autoAlpha: 1, y: 0, xPercent: 0 })
+  } else {
+    const mm = gsap.matchMedia()
+
+    mm.add('(min-width: 768px)', () => {
+      revealCards()
+
+      const distance = () => Math.max(0, rail.scrollWidth - window.innerWidth + 64)
+
+      const horizontalTween = gsap.to(rail, {
+        x: () => -distance(),
+        ease: 'none',
+        scrollTrigger: {
+          trigger: stage,
+          start: 'top top',
+          end: () => `+=${distance()}`,
+          scrub: 1,
+          pin: true,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+        },
+      })
+
+      slots.forEach((slot) => {
+        const cover = slot.querySelector<HTMLElement>('.project-cover')
+        const year = slot.querySelector<HTMLElement>('.project-year')
+        const details = slot.querySelectorAll<HTMLElement>('.project-tag, .project-title, .project-excerpt, .project-action')
+
+        if (cover) {
+          gsap.to(cover, {
+            xPercent: -8,
+            scale: 1.08,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: slot,
+              containerAnimation: horizontalTween,
+              start: 'left right',
+              end: 'right left',
+              scrub: true,
+            },
+          })
+        }
+
+        if (year) {
+          gsap.to(year, {
+            xPercent: 16,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: slot,
+              containerAnimation: horizontalTween,
+              start: 'left right',
+              end: 'right left',
+              scrub: true,
+            },
+          })
+        }
+
+        gsap.fromTo(
+          details,
+          { autoAlpha: 0, y: 12 },
+          {
+            autoAlpha: 1,
+            y: 0,
+            duration: 0.45,
+            stagger: 0.04,
+            ease: 'power2.out',
+            scrollTrigger: {
+              trigger: slot,
+              containerAnimation: horizontalTween,
+              start: 'left 72%',
+            },
+          },
+        )
+      })
+    })
+
+    mm.add('(max-width: 767px)', () => {
+      revealCards()
+    })
   }
 </script>

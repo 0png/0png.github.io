@@ -276,6 +276,7 @@ const words = headline.split(' ')
   const orb2 = hero.querySelector<HTMLElement>('.hero-orb-2')!
   const orb3 = hero.querySelector<HTMLElement>('.hero-orb-3')!
   const dots = hero.querySelector<HTMLElement>('.hero-dots')!
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
   // ── Mouse-tracking spotlight + 3D content tilt ────────────
   hero.addEventListener('mousemove', (e) => {
@@ -375,30 +376,53 @@ const words = headline.split(' ')
     scheduleType(0)
   }
 
-  // ── Entry animation ────────────────────────────────────────
-  const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
+  // ── Entry animation, sequenced after the global boot overlay ─────────────
+  let heroEntranceStarted = false
 
-  tl.to(badge, { opacity: 1, y: 0, duration: 0.7, delay: 0.1 })
-    .to(words, { opacity: 1, y: 0, duration: 0.8, stagger: 0.055 }, '-=0.35')
-    .to(rule, { opacity: 1, scaleX: 1, duration: 0.7, ease: 'power2.inOut' }, '-=0.4')
-    .to(trigger, { opacity: 1, y: 0, duration: 0.55, onComplete: startTypewriter }, '-=0.3')
-    .to(indicator, { opacity: 1, duration: 0.5 }, '-=0.3')
-    .to(scrollLine, { scaleY: 1, duration: 1, ease: 'power2.inOut' }, '<')
+  function startHeroEntrance() {
+    if (heroEntranceStarted || reduceMotion) return
+    heroEntranceStarted = true
 
-  // ── Multi-layer scroll parallax ───────────────────────────
-  const parallaxBase = { ease: 'none', scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true } }
+    gsap
+      .timeline({ defaults: { ease: 'power3.out' } })
+      .to(badge, { opacity: 1, y: 0, duration: 0.7, delay: 0.08 })
+      .to(words, { opacity: 1, y: 0, duration: 0.8, stagger: 0.055 }, '-=0.35')
+      .to(rule, { opacity: 1, scaleX: 1, duration: 0.7, ease: 'power2.inOut' }, '-=0.4')
+      .to(trigger, { opacity: 1, y: 0, duration: 0.55, onComplete: startTypewriter }, '-=0.3')
+      .to(indicator, { opacity: 1, duration: 0.5 }, '-=0.3')
+      .to(scrollLine, { scaleY: 1, duration: 1, ease: 'power2.inOut' }, '<')
+  }
 
-  // Orbs at 3 different depths (furthest = slowest upward drift)
-  gsap.to(orb1, { yPercent: -22, ...parallaxBase })
-  gsap.to(orb2, { yPercent: -48, ...parallaxBase })
-  gsap.to(orb3, { yPercent: -65, ...parallaxBase })
+  if (document.documentElement.dataset.siteReady === 'true') {
+    startHeroEntrance()
+  } else {
+    window.addEventListener('site-ready', startHeroEntrance, { once: true })
+    window.setTimeout(startHeroEntrance, 2300)
+  }
 
-  // Dot grid — mid-depth
-  gsap.to(dots, { yPercent: -18, ...parallaxBase })
-
-  // Hero content block — moves slightly slower than page scroll
-  gsap.to(content, { yPercent: -14, ...parallaxBase })
-
-  // Scroll indicator accelerates out of view quickly
-  gsap.to(indicator, { yPercent: -55, opacity: 0, ...parallaxBase })
+  // ── Pinned scroll exit ────────────────────────────────────
+  if (!reduceMotion) {
+    gsap
+      .timeline({
+        defaults: { ease: 'none' },
+        scrollTrigger: {
+          trigger: hero,
+          start: 'top top',
+          end: '+=120%',
+          scrub: true,
+          pin: true,
+          anticipatePin: 1,
+        },
+      })
+      .to(content, { yPercent: -34, scale: 0.94, filter: 'blur(3px)', opacity: 0.2 }, 0)
+      .to(words, { yPercent: -18, stagger: 0.02 }, 0)
+      .to(rule, { scaleX: 0.35, opacity: 0 }, 0)
+      .to(trigger, { yPercent: -40, opacity: 0 }, 0)
+      .to(indicator, { yPercent: -90, opacity: 0 }, 0)
+      .to(scrollLine, { scaleY: 0, opacity: 0 }, 0)
+      .to(dots, { yPercent: -26, opacity: 0.25 }, 0)
+      .to(orb1, { yPercent: -34, scale: 1.08, opacity: 0.4 }, 0)
+      .to(orb2, { yPercent: -62, scale: 0.92, opacity: 0.35 }, 0)
+      .to(orb3, { yPercent: -78, scale: 1.16, opacity: 0.28 }, 0)
+  }
 </script>

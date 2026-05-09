@@ -66,6 +66,18 @@
   border-color: hsl(var(--border));
 }
 
+html,
+body {
+  overflow-x: hidden;
+}
+
+@supports (overflow: clip) {
+  html,
+  body {
+    overflow-x: clip;
+  }
+}
+
 body {
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
