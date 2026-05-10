@@ -3,16 +3,46 @@ import BaseLayout from './BaseLayout.astro'
 import Footer from '@/components/Footer.astro'
 import { siteConfig } from '@/data/siteConfig'
 
+interface TocHeading {
+  depth: number
+  slug: string
+  text: string
+}
+
+interface AdjacentProject {
+  title: string
+  slug: string
+}
+
 interface Props {
   title: string
   date: string
   status: 'active' | 'wip' | 'archived'
+  excerpt: string
   repoUrl: string
   demoUrl?: string
   tags: string[]
+  headings: TocHeading[]
+  readingTimeText: string
+  canonicalPath: string
+  prevProject?: AdjacentProject
+  nextProject?: AdjacentProject
 }
 
-const { title, date, status, repoUrl, demoUrl, tags } = Astro.props
+const {
+  title,
+  date,
+  status,
+  excerpt,
+  repoUrl,
+  demoUrl,
+  tags,
+  headings,
+  readingTimeText,
+  canonicalPath,
+  prevProject,
+  nextProject,
+} = Astro.props
 
 const formattedDate = date
   ? new Date(date).toLocaleDateString('en-US', {
@@ -27,14 +57,17 @@ const statusLabel: Record<string, string> = {
   wip: 'In Progress',
   archived: 'Archived',
 }
+
+const canonicalUrl = new URL(canonicalPath, siteConfig.siteUrl ?? 'https://0png.github.io').toString()
 ---
 
 <BaseLayout title={title}>
-  <main class="mx-auto max-w-3xl px-6 py-16">
-    <a
-      href="/#projects"
-      class="mb-8 inline-flex items-center gap-2 text-sm text-white/40 transition-colors hover:text-white"
-    >
+  <div class="devlog-progress-shell" aria-hidden="true">
+    <div class="devlog-progress-bar" data-reading-progress></div>
+  </div>
+
+  <main class="devlog-page-shell">
+    <a href="/projects" class="devlog-back-link">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="14"
@@ -49,100 +82,732 @@ const statusLabel: Record<string, string> = {
         <path d="M19 12H5"></path>
         <path d="m12 19-7-7 7-7"></path>
       </svg>
-      Back to projects
+      Return to project index
     </a>
 
-    <header class="mb-10 space-y-4">
-      <div class="flex flex-wrap items-center gap-3">
-        {formattedDate && <p class="text-sm text-white/40">{formattedDate}</p>}
+    <header class="devlog-hero">
+      <div class="devlog-topline">
+        {formattedDate && <p class="devlog-date">{formattedDate}</p>}
         <span class="status-badge" data-status={status}>
           {statusLabel[status]}
         </span>
+        <span class="devlog-chip">READ TIME: {readingTimeText}</span>
+        <button type="button" class="devlog-chip devlog-copy-link" data-copy-link data-idle-label="COPY LINK">
+          COPY LINK
+        </button>
       </div>
 
-      <h1 class="text-4xl font-bold tracking-tight text-foreground">{title}</h1>
+      <div class="devlog-hero-grid">
+        <div class="devlog-hero-copy">
+          <p class="devlog-kicker">MISSION BRIEF</p>
+          <h1 class="devlog-title">{title}</h1>
+          <p class="devlog-excerpt">{excerpt}</p>
+        </div>
 
-      <div class="flex flex-wrap gap-1.5">
-        {
-          tags.map((tag) => (
-            <span class="inline-flex items-center rounded-full border border-white/[0.12] px-2.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-widest text-white/50">
-              {tag}
-            </span>
-          ))
-        }
-      </div>
-
-      <div class="flex flex-wrap gap-3 pt-1">
-        <a
-          href={repoUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="inline-flex items-center gap-1.5 text-sm text-white/50 transition-colors hover:text-white"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
-          </svg>
-          View on GitHub
-        </a>
-        {
-          demoUrl && (
-            <a
-              href={demoUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="inline-flex items-center gap-1.5 text-sm text-white/50 transition-colors hover:text-white"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                <polyline points="15 3 21 3 21 9" />
-                <line x1="10" y1="14" x2="21" y2="3" />
-              </svg>
-              Live Demo
+        <section class="devlog-meta-panel" aria-label="Project metadata">
+          <div class="devlog-meta-card">
+            <p>STATUS</p>
+            <strong>{statusLabel[status]}</strong>
+          </div>
+          <div class="devlog-meta-card">
+            <p>PUBLISHED</p>
+            <strong>{formattedDate}</strong>
+          </div>
+          <div class="devlog-meta-card">
+            <p>READ TIME</p>
+            <strong>{readingTimeText}</strong>
+          </div>
+          <div class="devlog-meta-card">
+            <p>TAGS</p>
+            <div class="devlog-tag-row">
+              {
+                tags.map((tag) => (
+                  <span>{tag}</span>
+                ))
+              }
+            </div>
+          </div>
+          <div class="devlog-meta-card">
+            <p>REPO</p>
+            <a href={repoUrl} target="_blank" rel="noopener noreferrer">
+              Open repository
             </a>
-          )
-        }
+          </div>
+          {
+            demoUrl && (
+              <div class="devlog-meta-card">
+                <p>DEMO</p>
+                <a href={demoUrl} target="_blank" rel="noopener noreferrer">
+                  Launch demo
+                </a>
+              </div>
+            )
+          }
+        </section>
       </div>
     </header>
 
-    <hr class="mb-10 border-white/[0.08]" />
+    {headings.length > 0 && (
+      <details class="devlog-mobile-toc">
+        <summary>
+          <span>SECTION INDEX</span>
+          <span class="devlog-mobile-toc-hint">tap to expand</span>
+        </summary>
+        <nav aria-label="Section index">
+          <ul class="devlog-toc-list">
+            {
+              headings.map((heading) => (
+                <li class:list={[heading.depth === 3 && 'is-subheading']}>
+                  <a href={`#${heading.slug}`} data-toc-link={heading.slug}>
+                    {heading.text}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </nav>
+      </details>
+    )}
 
-    <article class="prose prose-invert max-w-none">
-      <slot />
-    </article>
+    <div class="devlog-content-grid">
+      <article class="devlog-article prose prose-invert max-w-none" data-devlog-article>
+        <slot />
+      </article>
+
+      {headings.length > 0 && (
+        <aside class="devlog-toc-panel" aria-label="Section index">
+          <div class="devlog-toc-card">
+            <p class="devlog-toc-kicker">SECTION INDEX</p>
+            <ul class="devlog-toc-list">
+              {
+                headings.map((heading) => (
+                  <li class:list={[heading.depth === 3 && 'is-subheading']}>
+                    <a href={`#${heading.slug}`} data-toc-link={heading.slug}>
+                      {heading.text}
+                    </a>
+                  </li>
+                ))
+              }
+            </ul>
+          </div>
+        </aside>
+      )}
+    </div>
+
+    {(prevProject || nextProject) && (
+      <section class="devlog-nav-grid" aria-label="Adjacent projects">
+        {prevProject ? (
+          <a href={`/projects/${prevProject.slug}`} class="devlog-nav-card">
+            <span class="devlog-nav-label">PREV FILE</span>
+            <strong>{prevProject.title}</strong>
+            <span class="devlog-nav-path">/projects/{prevProject.slug}</span>
+          </a>
+        ) : (
+          <div class="devlog-nav-card is-empty" aria-hidden="true"></div>
+        )}
+
+        {nextProject ? (
+          <a href={`/projects/${nextProject.slug}`} class="devlog-nav-card">
+            <span class="devlog-nav-label">NEXT FILE</span>
+            <strong>{nextProject.title}</strong>
+            <span class="devlog-nav-path">/projects/{nextProject.slug}</span>
+          </a>
+        ) : (
+          <div class="devlog-nav-card is-empty" aria-hidden="true"></div>
+        )}
+      </section>
+    )}
   </main>
 
   <Footer githubUrl={siteConfig.githubUrl} year={siteConfig.year} />
 </BaseLayout>
 
-<style>
-  .status-badge {
+<style is:global>
+  .devlog-progress-shell {
+    position: fixed;
+    top: 4rem;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    z-index: 45;
+    background: rgba(255, 255, 255, 0.05);
+    pointer-events: none;
+  }
+
+  .devlog-progress-bar {
+    height: 100%;
+    width: 0;
+    background:
+      linear-gradient(90deg, rgba(250, 250, 250, 0.95), rgba(250, 204, 21, 0.72) 60%, rgba(250, 250, 250, 0.4));
+    box-shadow: 0 0 18px rgba(250, 204, 21, 0.18);
+    transform-origin: left center;
+    transition: width 0.12s linear;
+  }
+
+  .devlog-page-shell {
+    width: min(1320px, calc(100% - 2rem));
+    margin: 0 auto;
+    padding: 7.6rem 0 5rem;
+  }
+
+  .devlog-back-link,
+  .devlog-chip,
+  .devlog-meta-card a,
+  .devlog-toc-list a,
+  .devlog-nav-card {
+    font-family: ui-monospace, 'Cascadia Code', 'Fira Code', monospace;
+  }
+
+  .devlog-back-link {
     display: inline-flex;
     align-items: center;
-    padding: 0.2rem 0.6rem;
+    gap: 0.55rem;
+    margin-bottom: 1.4rem;
+    color: rgba(255, 255, 255, 0.42);
+    font-size: 0.74rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    transition: color 0.18s ease, transform 0.18s ease;
+  }
+
+  .devlog-back-link:hover {
+    color: rgb(250, 204, 21);
+    transform: translateX(-2px);
+  }
+
+  .devlog-hero {
+    display: grid;
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+  }
+
+  .devlog-topline {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.7rem;
+  }
+
+  .devlog-date {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.42);
+    font-size: 0.84rem;
+  }
+
+  .devlog-page-shell .status-badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2rem;
+    padding: 0.35rem 0.72rem;
     border-radius: 9999px;
-    font-family: ui-monospace, monospace;
-    font-size: 0.65rem;
+    border: 1px solid;
+    font-family: ui-monospace, 'Cascadia Code', 'Fira Code', monospace;
+    font-size: 0.66rem;
     font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .devlog-page-shell .status-badge[data-status='active'] {
+    color: rgb(74, 222, 128);
+    border-color: rgba(74, 222, 128, 0.28);
+    background: rgba(74, 222, 128, 0.08);
+  }
+
+  .devlog-page-shell .status-badge[data-status='wip'] {
+    color: rgb(251, 191, 36);
+    border-color: rgba(251, 191, 36, 0.28);
+    background: rgba(251, 191, 36, 0.08);
+  }
+
+  .devlog-page-shell .status-badge[data-status='archived'] {
+    color: rgb(148, 163, 184);
+    border-color: rgba(148, 163, 184, 0.22);
+    background: rgba(148, 163, 184, 0.08);
+  }
+
+  .devlog-chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2rem;
+    padding: 0.35rem 0.72rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.03);
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.66rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .devlog-copy-link {
+    cursor: pointer;
+    transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+  }
+
+  .devlog-copy-link:hover,
+  .devlog-copy-link.is-copied {
+    border-color: rgba(250, 204, 21, 0.35);
+    color: rgb(250, 204, 21);
+    background: rgba(250, 204, 21, 0.09);
+  }
+
+  .devlog-hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.18fr) minmax(300px, 0.82fr);
+    gap: 1.4rem;
+  }
+
+  .devlog-hero-copy,
+  .devlog-meta-panel,
+  .devlog-mobile-toc,
+  .devlog-toc-card,
+  .devlog-nav-card {
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.01)),
+      rgba(8, 8, 8, 0.86);
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.18);
+    backdrop-filter: blur(14px);
+  }
+
+  .devlog-hero-copy {
+    padding: clamp(1.35rem, 3vw, 2rem);
+  }
+
+  .devlog-kicker,
+  .devlog-toc-kicker,
+  .devlog-nav-label,
+  .devlog-meta-card p {
+    margin: 0;
+    color: rgba(250, 204, 21, 0.58);
+    font-family: ui-monospace, 'Cascadia Code', 'Fira Code', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  .devlog-title {
+    margin: 0.7rem 0 0;
+    color: rgb(250, 250, 250);
+    font-size: clamp(2.8rem, 5.4vw, 4.9rem);
+    line-height: 0.92;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+  }
+
+  .devlog-excerpt {
+    max-width: 46rem;
+    margin: 1.15rem 0 0;
+    color: rgba(255, 255, 255, 0.66);
+    font-size: 1.02rem;
+    line-height: 1.78;
+  }
+
+  .devlog-meta-panel {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.8rem;
+    padding: 1rem;
+    align-content: start;
+  }
+
+  .devlog-meta-card {
+    display: grid;
+    gap: 0.55rem;
+    min-height: 5.75rem;
+    padding: 0.9rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .devlog-meta-card strong {
+    color: white;
+    font-size: 0.96rem;
+    line-height: 1.5;
+    font-weight: 600;
+  }
+
+  .devlog-meta-card a {
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 0.82rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    border: 1px solid;
+    transition: color 0.18s ease;
   }
 
-  .status-badge[data-status="active"] {
-    color: rgb(74 222 128);
-    border-color: rgb(74 222 128 / 0.3);
-    background: rgb(74 222 128 / 0.08);
+  .devlog-meta-card a:hover {
+    color: rgb(250, 204, 21);
   }
 
-  .status-badge[data-status="wip"] {
-    color: rgb(251 191 36);
-    border-color: rgb(251 191 36 / 0.3);
-    background: rgb(251 191 36 / 0.08);
+  .devlog-tag-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.42rem;
   }
 
-  .status-badge[data-status="archived"] {
-    color: rgb(148 163 184);
-    border-color: rgb(148 163 184 / 0.2);
-    background: rgb(148 163 184 / 0.06);
+  .devlog-tag-row span {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 9999px;
+    border: 1px solid rgba(255, 255, 255, 0.11);
+    padding: 0.24rem 0.55rem;
+    color: rgba(255, 255, 255, 0.62);
+    font-family: ui-monospace, 'Cascadia Code', 'Fira Code', monospace;
+    font-size: 0.64rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .devlog-mobile-toc {
+    display: none;
+    overflow: hidden;
+    margin-bottom: 1rem;
+  }
+
+  .devlog-mobile-toc summary {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.95rem 1rem;
+    cursor: pointer;
+    list-style: none;
+    color: rgba(255, 255, 255, 0.78);
+    font-family: ui-monospace, 'Cascadia Code', 'Fira Code', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .devlog-mobile-toc summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .devlog-mobile-toc-hint {
+    color: rgba(255, 255, 255, 0.38);
+    font-size: 0.64rem;
+  }
+
+  .devlog-mobile-toc nav {
+    padding: 0 1rem 1rem;
+  }
+
+  .devlog-content-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 248px;
+    gap: 1rem;
+    align-items: start;
+  }
+
+  .devlog-article {
+    min-width: 0;
+    padding: clamp(1.35rem, 3vw, 2rem);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 24%),
+      rgba(8, 8, 8, 0.72);
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.15);
+  }
+
+  .devlog-toc-panel {
+    position: sticky;
+    top: 6.2rem;
+  }
+
+  .devlog-toc-card {
+    padding: 1rem;
+  }
+
+  .devlog-toc-list {
+    display: grid;
+    gap: 0.35rem;
+    margin: 0.9rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .devlog-toc-list li.is-subheading a {
+    padding-left: 1rem;
+    color: rgba(255, 255, 255, 0.44);
+    font-size: 0.76rem;
+  }
+
+  .devlog-toc-list a {
+    display: block;
+    padding: 0.45rem 0.55rem;
+    border-left: 1px solid rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.8rem;
+    line-height: 1.4;
+    transition: color 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+  }
+
+  .devlog-toc-list a:hover,
+  .devlog-toc-list a.is-active {
+    color: rgb(250, 204, 21);
+    border-color: rgba(250, 204, 21, 0.4);
+    background: rgba(250, 204, 21, 0.06);
+  }
+
+  .devlog-nav-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin-top: 1.4rem;
+  }
+
+  .devlog-nav-card {
+    display: grid;
+    gap: 0.6rem;
+    min-height: 8rem;
+    padding: 1rem;
+    transition: border-color 0.2s ease, transform 0.2s ease, background 0.2s ease;
+  }
+
+  .devlog-nav-card strong {
+    color: white;
+    font-size: 1.08rem;
+    line-height: 1.4;
+  }
+
+  .devlog-nav-card:hover {
+    border-color: rgba(250, 204, 21, 0.28);
+    transform: translateY(-2px);
+    background:
+      linear-gradient(180deg, rgba(250, 204, 21, 0.06), rgba(255, 255, 255, 0.01)),
+      rgba(8, 8, 8, 0.9);
+  }
+
+  .devlog-nav-card.is-empty {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .devlog-nav-path {
+    color: rgba(255, 255, 255, 0.44);
+    font-family: ui-monospace, 'Cascadia Code', 'Fira Code', monospace;
+    font-size: 0.74rem;
+    line-height: 1.5;
+  }
+
+  :global(.devlog-article h2[id]),
+  :global(.devlog-article h3[id]) {
+    scroll-margin-top: 5.5rem;
+  }
+
+  :global(.devlog-article h2) {
+    margin-top: 2.4rem;
+    color: white;
+    font-size: clamp(1.65rem, 3vw, 2.2rem);
+    line-height: 1.1;
+  }
+
+  :global(.devlog-article h3) {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: clamp(1.15rem, 2.2vw, 1.4rem);
+  }
+
+  :global(.devlog-article hr) {
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+
+  :global(.devlog-article p),
+  :global(.devlog-article li) {
+    color: rgba(255, 255, 255, 0.74);
+    line-height: 1.85;
+  }
+
+  :global(.devlog-article a) {
+    color: rgb(250, 204, 21);
+  }
+
+  @media (max-width: 1080px) {
+    .devlog-content-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .devlog-toc-panel {
+      display: none;
+    }
+
+    .devlog-mobile-toc {
+      display: block;
+    }
+  }
+
+  @media (max-width: 860px) {
+    .devlog-page-shell {
+      width: calc(100% - 1rem);
+      padding-top: 7rem;
+    }
+
+    .devlog-hero-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .devlog-meta-panel {
+      grid-template-columns: 1fr;
+    }
+
+    .devlog-nav-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .devlog-nav-card.is-empty {
+      display: none;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .devlog-progress-shell {
+      top: 3.7rem;
+    }
+
+    .devlog-title {
+      font-size: clamp(2.2rem, 12vw, 3.1rem);
+    }
+
+    .devlog-excerpt {
+      font-size: 0.96rem;
+      line-height: 1.7;
+    }
+
+    .devlog-article {
+      padding: 1.1rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .devlog-progress-bar,
+    .devlog-back-link,
+    .devlog-copy-link,
+    .devlog-toc-list a,
+    .devlog-nav-card {
+      transition: none;
+    }
   }
 </style>
+
+<script define:vars={{ canonicalUrl }}>
+  const progressBar = document.querySelector<HTMLElement>('[data-reading-progress]')
+  const article = document.querySelector<HTMLElement>('[data-devlog-article]')
+  const tocLinks = Array.from(document.querySelectorAll<HTMLAnchorElement>('[data-toc-link]'))
+  const copyLinkButton = document.querySelector<HTMLButtonElement>('[data-copy-link]')
+
+  function updateReadingProgress() {
+    if (!progressBar || !article) return
+
+    const rect = article.getBoundingClientRect()
+    const articleTop = window.scrollY + rect.top
+    const articleHeight = article.offsetHeight
+    const viewportOffset = window.innerHeight * 0.2
+    const progress = (window.scrollY + viewportOffset - articleTop) / Math.max(articleHeight, 1)
+    const clamped = Math.max(0, Math.min(1, progress))
+
+    progressBar.style.width = `${clamped * 100}%`
+  }
+
+  const headingTargets = tocLinks
+    .map((link) => {
+      const slug = link.dataset.tocLink
+      if (!slug) return null
+      const target = document.getElementById(slug)
+      if (!target) return null
+      return { slug, target }
+    })
+    .filter(Boolean)
+
+  function updateActiveToc() {
+    if (!headingTargets.length) return
+
+    const threshold = window.innerHeight * 0.24
+    let activeSlug = headingTargets[0].slug
+
+    headingTargets.forEach(({ slug, target }) => {
+      const top = target.getBoundingClientRect().top
+      if (top <= threshold) activeSlug = slug
+    })
+
+    tocLinks.forEach((link) => {
+      const isActive = link.dataset.tocLink === activeSlug
+      link.classList.toggle('is-active', isActive)
+      if (isActive) link.setAttribute('aria-current', 'true')
+      else link.removeAttribute('aria-current')
+    })
+  }
+
+  function scrollToHeading(link: HTMLAnchorElement) {
+    const slug = link.dataset.tocLink
+    if (!slug) return
+
+    const target = document.getElementById(slug)
+    if (!target) return
+
+    const topOffset = Math.min(144, Math.max(92, window.innerHeight * 0.22))
+    const targetY = window.scrollY + target.getBoundingClientRect().top - topOffset
+
+    window.scrollTo({
+      top: Math.max(0, targetY),
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+    })
+
+    const mobileToc = link.closest('details')
+    if (mobileToc instanceof HTMLDetailsElement) {
+      mobileToc.open = false
+    }
+  }
+
+  async function copyCanonicalLink() {
+    if (!copyLinkButton) return
+
+    const idleLabel = copyLinkButton.dataset.idleLabel ?? 'COPY LINK'
+
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(canonicalUrl)
+      } else {
+        const temp = document.createElement('input')
+        temp.value = canonicalUrl
+        document.body.append(temp)
+        temp.select()
+        document.execCommand('copy')
+        temp.remove()
+      }
+
+      copyLinkButton.textContent = 'COPIED'
+      copyLinkButton.classList.add('is-copied')
+      window.setTimeout(() => {
+        if (!copyLinkButton) return
+        copyLinkButton.textContent = idleLabel
+        copyLinkButton.classList.remove('is-copied')
+      }, 1600)
+    } catch {
+      copyLinkButton.textContent = 'COPY FAILED'
+      window.setTimeout(() => {
+        if (!copyLinkButton) return
+        copyLinkButton.textContent = idleLabel
+      }, 1600)
+    }
+  }
+
+  updateReadingProgress()
+  updateActiveToc()
+
+  window.addEventListener('scroll', () => {
+    updateReadingProgress()
+    updateActiveToc()
+  }, { passive: true })
+
+  window.addEventListener('resize', () => {
+    updateReadingProgress()
+    updateActiveToc()
+  })
+
+  copyLinkButton?.addEventListener('click', copyCanonicalLink)
+  tocLinks.forEach((link) => {
+    link.addEventListener('click', (event) => {
+      event.preventDefault()
+      scrollToHeading(link)
+    })
+  })
+</script>

@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content'
 import BlogLayout from '@/layouts/BlogLayout.astro'
+import { projects } from '@/data/projects'
 
 export async function getStaticPaths() {
   const entries = await getCollection('projects')
@@ -11,17 +12,52 @@ export async function getStaticPaths() {
 }
 
 const { entry } = Astro.props
-const { Content } = await entry.render()
-const { title, date, status, repoUrl, demoUrl, tags } = entry.data
+const { Content, headings } = await entry.render()
+const { title, date, status, repoUrl, demoUrl, tags, excerpt } = entry.data
+
+const readingWords = entry.body
+  .replace(/```[\s\S]*?```/g, ' ')
+  .replace(/`[^`]*`/g, ' ')
+  .replace(/!\[[^\]]*]\([^)]*\)/g, ' ')
+  .replace(/\[[^\]]*]\([^)]*\)/g, ' ')
+  .replace(/[#>*_\-\n\r]/g, ' ')
+  .trim()
+  .split(/\s+/)
+  .filter(Boolean).length
+
+const readingTimeMinutes = Math.max(1, Math.ceil(readingWords / 200))
+const readingTimeText = `${readingTimeMinutes} min read`
+const canonicalPath = `/projects/${entry.slug}`
+
+const currentProjectIndex = projects.findIndex((project) => project.devlogSlug === entry.slug)
+const prevProjectSource = currentProjectIndex > 0 ? projects[currentProjectIndex - 1] : null
+const nextProjectSource =
+  currentProjectIndex >= 0 && currentProjectIndex < projects.length - 1
+    ? projects[currentProjectIndex + 1]
+    : null
+
+const prevProject = prevProjectSource?.devlogSlug
+  ? { title: prevProjectSource.title, slug: prevProjectSource.devlogSlug }
+  : undefined
+const nextProject = nextProjectSource?.devlogSlug
+  ? { title: nextProjectSource.title, slug: nextProjectSource.devlogSlug }
+  : undefined
+const articleHeadings = headings.filter((heading) => heading.depth === 2 || heading.depth === 3)
 ---
 
 <BlogLayout
   title={title}
   date={date.toISOString()}
   status={status}
+  excerpt={excerpt}
   repoUrl={repoUrl}
   demoUrl={demoUrl}
   tags={tags}
+  headings={articleHeadings}
+  readingTimeText={readingTimeText}
+  canonicalPath={canonicalPath}
+  prevProject={prevProject}
+  nextProject={nextProject}
 >
   <Content />
 </BlogLayout>

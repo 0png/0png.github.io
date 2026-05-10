@@ -28,7 +28,7 @@ export const projects: Project[] = [
     id: 'uniconvert',
     title: 'Uniconvert',
     description:
-      'A fast, offline-first unit converter covering length, mass, temperature, currency, and more. No ads, no tracking, just conversions.',
+      'A powerful file conversion tool built with Electron and React.',
     excerpt: 'Seamless conversions, zero friction.',
     tags: ['JavaScript', 'React', 'Electron'],
     devlogSlug: 'uniconvert',

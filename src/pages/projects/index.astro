@@ -159,7 +159,7 @@ const latestYear = Math.max(...allProjects.map((project) => project.year))
     position: relative;
     isolation: isolate;
     min-height: 100vh;
-    overflow: hidden;
+    overflow: clip;
     background:
       linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 12rem),
       linear-gradient(180deg, hsl(var(--background)) 0%, rgba(9, 12, 10, 0.98) 48%, hsl(var(--background)) 100%);
@@ -276,6 +276,7 @@ const latestYear = Math.max(...allProjects.map((project) => project.year))
   .projects-command-line {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 0.6rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     padding-bottom: 1rem;
@@ -477,9 +478,9 @@ const latestYear = Math.max(...allProjects.map((project) => project.year))
     inset: 0;
     pointer-events: none;
     background:
-      linear-gradient(90deg, rgba(74, 222, 128, 0.18), transparent 28%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent 26%),
       repeating-linear-gradient(0deg, transparent, transparent 9px, rgba(255, 255, 255, 0.035) 10px);
-    opacity: 0.42;
+    opacity: 0.34;
   }
 
   .project-panel-media {
@@ -487,9 +488,8 @@ const latestYear = Math.max(...allProjects.map((project) => project.year))
     min-height: 100%;
     overflow: hidden;
     background:
-      radial-gradient(circle at 35% 28%, rgba(74, 222, 128, 0.28), transparent 18rem),
-      radial-gradient(circle at 76% 72%, rgba(56, 189, 248, 0.22), transparent 16rem),
-      #090909;
+      linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.015)),
+      #111111;
     transform: translate3d(0, 0, 70px);
     will-change: transform;
   }
@@ -753,6 +753,23 @@ const latestYear = Math.max(...allProjects.map((project) => project.year))
       width: calc(100% - 2rem);
     }
 
+    .projects-hero-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .projects-command-line {
+      align-items: flex-start;
+    }
+
+    .command-head {
+      width: 100%;
+      margin-left: 0;
+    }
+
+    .projects-kicker {
+      letter-spacing: 0.22em;
+    }
+
     .project-stack-card,
     .project-stack-card.is-reversed {
       min-height: auto;
@@ -778,6 +795,13 @@ const latestYear = Math.max(...allProjects.map((project) => project.year))
       min-height: auto;
     }
 
+    .project-stack-card.is-reversed .project-panel,
+    .project-stack-card.is-reversed .project-node-callout {
+      grid-column: auto;
+      grid-row: auto;
+      justify-self: stretch;
+    }
+
     .project-panel-media,
     .project-panel-media img {
       min-height: 260px;
@@ -785,18 +809,41 @@ const latestYear = Math.max(...allProjects.map((project) => project.year))
 
     .project-node-callout,
     .project-stack-card.is-reversed .project-node-callout {
-      grid-template-columns: auto 1fr;
+      grid-template-columns: 1fr;
+      justify-items: start;
+      gap: 0.75rem;
       transform: none;
       opacity: 1;
     }
 
+    .project-callout-line,
     .project-stack-card.is-reversed .project-callout-line {
-      grid-column: 2;
-      background: linear-gradient(90deg, rgba(74, 222, 128, 0.68), rgba(255, 255, 255, 0.08));
+      width: 1px;
+      min-width: 1px;
+      min-height: 2.75rem;
+      height: 2.75rem;
+      margin-left: 0.5rem;
+      background: linear-gradient(180deg, rgba(74, 222, 128, 0.68), rgba(255, 255, 255, 0.08));
+      transform: scaleY(1);
+      transform-origin: top center;
+    }
+
+    .project-callout-copy {
+      width: 100%;
+      margin-top: 0;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .project-stack-card.is-reversed .project-callout-line {
+      grid-column: auto;
+      grid-row: auto;
+      background: linear-gradient(180deg, rgba(74, 222, 128, 0.68), rgba(255, 255, 255, 0.08));
     }
 
     .project-stack-card.is-reversed .project-node-dot {
-      grid-column: 1;
+      grid-column: auto;
+      grid-row: auto;
     }
   }
 
@@ -806,20 +853,49 @@ const latestYear = Math.max(...allProjects.map((project) => project.year))
       padding-top: 6.5rem;
     }
 
-    .projects-lede {
-      font-size: 0.98rem;
+    .projects-title {
+      font-size: clamp(2.8rem, 16vw, 4.4rem);
     }
 
-    .projects-command-row span {
+    .projects-lede {
+      font-size: 0.98rem;
+      line-height: 1.68;
+    }
+
+    .projects-command-line {
+      font-size: 0.65rem;
+      gap: 0.45rem 0.65rem;
+    }
+
+    .projects-command-line span {
       width: 100%;
+      overflow-wrap: anywhere;
     }
 
     .projects-stack-track {
       gap: 3rem;
     }
 
+    .projects-stat-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .projects-stat-panel strong {
+      font-size: 1.7rem;
+    }
+
+    .project-panel-copy h2 {
+      font-size: clamp(1.8rem, 10vw, 2.6rem);
+    }
+
     .project-panel-copy {
       padding: 1.1rem;
+    }
+
+    .project-panel-copy p,
+    .project-callout-copy p {
+      font-size: 0.95rem;
+      line-height: 1.6;
     }
 
     .project-callout-copy {

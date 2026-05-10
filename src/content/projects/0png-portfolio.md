@@ -23,7 +23,7 @@ Personal portfolio website built with Astro 5, GSAP 3, and Tailwind CSS v4. The 
 - **Language**: TypeScript 5 (strict mode)
 - **Deployment**: GitHub Pages via GitHub Actions
 
---
+---
 
 ## Pages
 
@@ -32,7 +32,7 @@ Personal portfolio website built with Astro 5, GSAP 3, and Tailwind CSS v4. The 
 - **Projects / [slug]** — individual project devlogs rendered from markdown content collections
 - **Changelog** — full commit history timeline pulled from `changelog.json`
 
---
+---
 
 ## Features
 
