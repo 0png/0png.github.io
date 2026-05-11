@@ -16,6 +16,9 @@ describe('scroll experience upgrade', () => {
     expect(baseLayout).toContain('terminal-palette')
     expect(baseLayout).toContain('bg-neutral-950')
     expect(baseLayout).toContain("new Event('site-ready')")
+    expect(baseLayout).toContain('data-reset-home-scroll-on-load')
+    expect(baseLayout).toContain("document.body.dataset.resetHomeScrollOnLoad === 'true'")
+    expect(baseLayout).toContain("initScroll({ resetToTopOnLoad: resetHomeScrollOnLoad })")
   })
 
   it('keeps the boot overlay aligned with the existing dark terminal palette', () => {

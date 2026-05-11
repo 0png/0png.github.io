@@ -44,6 +44,14 @@ describe('initScroll', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mocks.MockLenis.mockReturnValue(mocks.mockLenisInstance)
+    Object.defineProperty(globalThis, 'window', {
+      configurable: true,
+      value: {
+        history: { scrollRestoration: 'auto' },
+        scrollTo: vi.fn(),
+        addEventListener: vi.fn(),
+      },
+    })
   })
 
   it('returns the Lenis instance', () => {
@@ -77,5 +85,13 @@ describe('initScroll', () => {
   it('registers ScrollTrigger.update on lenis scroll event', () => {
     initScroll()
     expect(mocks.mockLenisOn).toHaveBeenCalledWith('scroll', mocks.mockScrollTriggerUpdate)
+  })
+
+  it('can force the homepage back to the hero on load and pageshow restore', () => {
+    initScroll({ resetToTopOnLoad: true })
+
+    expect(window.history.scrollRestoration).toBe('manual')
+    expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, left: 0, behavior: 'auto' })
+    expect(window.addEventListener).toHaveBeenCalledWith('pageshow', expect.any(Function))
   })
 })

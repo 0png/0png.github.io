@@ -15,6 +15,7 @@ const image = Astro.props.image ?? '/og-image.png'
 const canonicalUrl = Astro.url.href
 const siteUrl = Astro.site?.origin ?? 'https://0png.github.io'
 const ogImage = image.startsWith('http') ? image : `${siteUrl}${image}`
+const resetHomeScrollOnLoad = Astro.url.pathname === '/'
 ---
 
 <!doctype html>
@@ -211,7 +212,7 @@ const ogImage = image.startsWith('http') ? image : `${siteUrl}${image}`
       }
     </style>
   </head>
-  <body>
+  <body data-reset-home-scroll-on-load={resetHomeScrollOnLoad ? 'true' : 'false'}>
     {
       showBoot && (
         <div id="site-boot" class="terminal-palette" aria-live="polite" aria-label="Loading 0PNG">
@@ -302,7 +303,8 @@ const ogImage = image.startsWith('http') ? image : `${siteUrl}${image}`
     </script>
     <script>
       import { initScroll } from '@/lib/scroll'
-      initScroll()
+      const resetHomeScrollOnLoad = document.body.dataset.resetHomeScrollOnLoad === 'true'
+      initScroll({ resetToTopOnLoad: resetHomeScrollOnLoad })
     </script>
     <script>
       const isMobile = navigator.maxTouchPoints > 0 && window.innerWidth < 1024

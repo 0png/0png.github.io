@@ -16,6 +16,7 @@ describe('terminal command palette', () => {
     expect(COMMAND_KEYS).toContain('tree')
     expect(COMMAND_KEYS).toContain('find /projects')
     expect(COMMAND_KEYS).toContain('grep -i astro /projects')
+    expect(COMMAND_KEYS).toContain('cat /changelog/commits.log')
     expect(COMMAND_KEYS).toContain('xdg-open .')
     expect(COMMAND_KEYS).toContain('uname -a')
   })

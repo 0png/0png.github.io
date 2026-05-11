@@ -7,7 +7,7 @@ export const navHrefForPath = (path: string) => {
   if (path === '/about') return '/#about'
   if (path === '/projects') return '/projects'
   if (path.startsWith('/projects/')) return path
-  if (path === '/changelog') return '/#changelog'
+  if (path === '/changelog') return '/changelog'
   if (path === '/contact') return '/#contact'
   return null
 }

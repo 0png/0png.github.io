@@ -1,3 +1,4 @@
+import changelog from '@/data/changelog.json'
 import { siteConfig } from '@/data/siteConfig'
 import { COMMAND_KEYS, HELP_SECTIONS, projectBySlug, projectEntries } from '@/lib/terminal/content'
 import { formatCwd, isDirectory, navHrefForPath, normalizePath } from '@/lib/terminal/pathing'
@@ -5,6 +6,29 @@ import type { CommandContext, CommandResult, HelpTopic, Line } from '@/lib/termi
 import { mkLine } from '@/lib/terminal/types'
 
 export { COMMAND_KEYS, formatCwd, navHrefForPath, normalizePath }
+
+type ChangelogEntry = {
+  date: string
+  subject: string
+  body: string
+  hash: string
+}
+
+const changelogEntries = (changelog as ChangelogEntry[]).slice(0, 5)
+
+const formatChangelogPreview = (entry: ChangelogEntry): Line[] => {
+  const preview = entry.body
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .find((line) => !/^co-authored-by:/i.test(line))
+    ?.replace(/^[-*]\s*/, '')
+
+  return [
+    mkLine('success', `  ${entry.date}  ${entry.hash}  ${entry.subject}`),
+    ...(preview ? [mkLine('out', `    ${preview}`)] : []),
+  ]
+}
 
 const listDirectory = (path: string): Line[] => {
   if (path === '/' || path === '/home') {
@@ -82,6 +106,8 @@ const readFile = (path: string): Line[] => {
   if (filePath === '/changelog/commits.log') {
     return [
       mkLine('info', filePath),
+      ...changelogEntries.flatMap(formatChangelogPreview),
+      mkLine('out', ''),
       mkLine('out', '  Open /changelog for the full terminal-style commit feed.'),
     ]
   }
@@ -262,8 +288,8 @@ const commandMap: Record<string, (ctx: CommandContext) => CommandResult> = {
     cwd: '/projects',
   }),
   'cd /changelog': () => ({
-    lines: [mkLine('info', 'Navigating to /#changelog…')],
-    href: '/#changelog',
+    lines: [mkLine('info', 'Navigating to /changelog…')],
+    href: '/changelog',
     cwd: '/changelog',
   }),
   'cd /contact': () => ({

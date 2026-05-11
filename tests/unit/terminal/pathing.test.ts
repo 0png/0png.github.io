@@ -24,7 +24,7 @@ describe('terminal pathing helpers', () => {
     expect(navHrefForPath('/about')).toBe('/#about')
     expect(navHrefForPath('/projects')).toBe('/projects')
     expect(navHrefForPath('/projects/0png-portfolio')).toBe('/projects/0png-portfolio')
-    expect(navHrefForPath('/changelog')).toBe('/#changelog')
+    expect(navHrefForPath('/changelog')).toBe('/changelog')
     expect(navHrefForPath('/contact')).toBe('/#contact')
     expect(navHrefForPath('/missing')).toBeNull()
   })

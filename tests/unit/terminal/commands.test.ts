@@ -65,6 +65,27 @@ describe('terminal command resolver', () => {
     expect(grep.lines.some((line) => line.text.includes('/projects/0png-portfolio:'))).toBe(true)
   })
 
+  it('routes changelog navigation to the standalone page and prints commit excerpts', () => {
+    const changelogNav = resolveCommand({
+      cwd: '/',
+      history: [],
+      key: 'cd /changelog',
+      display: 'cd /changelog',
+    })
+    const changelogLog = resolveCommand({
+      cwd: '/',
+      history: [],
+      key: 'cat /changelog/commits.log',
+      display: 'cat /changelog/commits.log',
+    })
+
+    expect(changelogNav.href).toBe('/changelog')
+    expect(changelogNav.cwd).toBe('/changelog')
+    expect(changelogLog.lines[0]?.text).toBe('/changelog/commits.log')
+    expect(changelogLog.lines.some((line) => line.text.includes('feat: redesign changelog surfaces'))).toBe(true)
+    expect(changelogLog.lines.some((line) => line.text.includes('Open /changelog for the full terminal-style commit feed.'))).toBe(true)
+  })
+
   it('returns open targets without triggering side effects', () => {
     const openCurrent = resolveCommand({
       cwd: '/projects',
