@@ -65,6 +65,10 @@ export default function ContactDashboard({ activityLog = [], discord, email }: P
   const [time, setTime] = useState('--:--:--')
 
   const totalCommits = activityLog.reduce((sum, d) => sum + d.count, 0)
+  const mobileActivityLog = activityLog.slice(-30)
+  const mobileCommits = mobileActivityLog.reduce((sum, entry) => sum + entry.count, 0)
+  const activeDays = mobileActivityLog.filter((entry) => entry.count > 0).length
+  const peakCount = mobileActivityLog.reduce((max, entry) => Math.max(max, entry.count), 0)
 
   useEffect(() => {
     const tick = () =>
@@ -137,29 +141,79 @@ export default function ContactDashboard({ activityLog = [], discord, email }: P
           <span className="font-mono text-[11px] text-white/25">// last {activityLog.length} days</span>
         </div>
 
+        <div className="space-y-3 md:hidden">
+          <div className="grid grid-cols-2 gap-2">
+            <div className="rounded-sm border border-white/[0.08] bg-white/[0.02] px-3 py-2.5">
+              <div className="font-mono text-[10px] uppercase tracking-[0.26em] text-white/30">30d commits</div>
+              <div className="mt-1 font-mono text-base text-neutral-100">{mobileCommits.toLocaleString()}</div>
+            </div>
+            <div className="rounded-sm border border-white/[0.08] bg-white/[0.02] px-3 py-2.5">
+              <div className="font-mono text-[10px] uppercase tracking-[0.26em] text-white/30">active days</div>
+              <div className="mt-1 font-mono text-base text-neutral-100">
+                {activeDays}
+                <span className="ml-1 text-[11px] text-white/30">/ 30</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-sm border border-white/[0.08] bg-gradient-to-b from-white/[0.03] to-white/[0.015] px-3 py-3">
+            <div className="mb-2 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.24em] text-white/28">
+              <span>Recent Month</span>
+              <span>peak {peakCount}</span>
+            </div>
+
+            <div className="flex h-20 items-end gap-1">
+              {mobileActivityLog.map((entry, i) => {
+                const height = peakCount > 0 ? Math.max(14, (entry.count / peakCount) * 100) : 14
+
+                return (
+                  <div
+                    key={i}
+                    className="flex-1 rounded-[2px] border border-emerald-400/10"
+                    style={{
+                      height: `${height}%`,
+                      background:
+                        entry.level === 0
+                          ? 'rgba(255,255,255,0.045)'
+                          : `linear-gradient(to top, rgba(16,185,129,${Math.max(LOG_OPACITIES[entry.level] - 0.08, 0.16)}), rgba(74,222,128,${Math.max(LOG_OPACITIES[entry.level], 0.28)}))`,
+                    }}
+                  />
+                )
+              })}
+            </div>
+
+            <div className="mt-2 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.22em] text-white/24">
+              <span>30 days ago</span>
+              <span>today</span>
+            </div>
+          </div>
+        </div>
+
         {/* Render activityLog as horizontal bar chart */}
-        <div className="flex h-5 w-full gap-[2px] overflow-hidden rounded-[1px]">
-          {activityLog.map((entry, i) => (
-            <div
-              key={i}
-              className="h-full grow cursor-default"
-              style={{ 
-                backgroundColor: `rgba(52,211,153,${LOG_OPACITIES[entry.level]})` 
-              }}
-              onMouseEnter={(e) => {
-                // Anchor to the bar element itself, not the cursor position.
-                // getBoundingClientRect() returns viewport-relative coords that
-                // are unaffected by subsequent scroll or layout shifts.
-                const rect = e.currentTarget.getBoundingClientRect()
-                setLogTooltip({
-                  entry,
-                  x: rect.left + rect.width / 2, // horizontal center of bar
-                  y: rect.top,                    // top edge of bar
-                })
-              }}
-              onMouseLeave={() => setLogTooltip(null)}
-            />
-          ))}
+        <div className="hidden md:block">
+          <div className="flex h-5 w-full gap-[2px] overflow-hidden rounded-[1px]">
+            {activityLog.map((entry, i) => (
+              <div
+                key={i}
+                className="h-full grow cursor-default"
+                style={{
+                  backgroundColor: `rgba(52,211,153,${LOG_OPACITIES[entry.level]})`,
+                }}
+                onMouseEnter={(e) => {
+                  // Anchor to the bar element itself, not the cursor position.
+                  // getBoundingClientRect() returns viewport-relative coords that
+                  // are unaffected by subsequent scroll or layout shifts.
+                  const rect = e.currentTarget.getBoundingClientRect()
+                  setLogTooltip({
+                    entry,
+                    x: rect.left + rect.width / 2, // horizontal center of bar
+                    y: rect.top, // top edge of bar
+                  })
+                }}
+                onMouseLeave={() => setLogTooltip(null)}
+              />
+            ))}
+          </div>
         </div>
       </div>
 

@@ -41,6 +41,13 @@ describe('scroll experience upgrade', () => {
     expect(projects).toContain('xPercent')
   })
 
+  it('keeps core hero copy and scroll hint visible during the pinned scroll exit', () => {
+    expect(hero).not.toContain(".to([badge, heading], { filter: 'blur(3px)', opacity: 0.2 }, 0)")
+    expect(hero).not.toContain(".to(rule, { scaleX: 0.35, opacity: 0 }, 0)")
+    expect(hero).not.toContain(".to(indicator, { yPercent: -90, opacity: 0 }, 0)")
+    expect(hero).not.toContain(".to(scrollLine, { scaleY: 0, opacity: 0 }, 0)")
+  })
+
   it('renders the homepage changelog as an animated terminal feed', () => {
     expect(changelog).toContain('changelog-terminal')
     expect(changelog).toContain('changelog-feed')
