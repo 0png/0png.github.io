@@ -96,7 +96,8 @@ export default function ContactDashboard({ activityLog = [], discord, email }: P
 
   // Layout constants — spine at 24 px from left edge of the container
   const SPINE_X = 24
-  const CONTENT_LEFT = 56 // pl-14
+  const CONTENT_LEFT = 56
+  const CONTENT_RIGHT = 16
 
   const ROW = 'relative border-b border-white/[0.04] last:border-0 py-5'
 
@@ -129,7 +130,7 @@ export default function ContactDashboard({ activityLog = [], discord, email }: P
       />
 
       {/* ── [ACTIVITY] ──────────────────────────────────────────────────────── */}
-      <div className={ROW} style={{ paddingLeft: CONTENT_LEFT }}>
+      <div className={ROW} style={{ paddingLeft: CONTENT_LEFT, paddingRight: CONTENT_RIGHT }}>
         <SpineNode />
 
         <div className="mb-3 flex flex-wrap items-baseline gap-2">
@@ -162,24 +163,26 @@ export default function ContactDashboard({ activityLog = [], discord, email }: P
               <span>peak {peakCount}</span>
             </div>
 
-            <div className="flex h-20 items-end gap-1">
-              {mobileActivityLog.map((entry, i) => {
-                const height = peakCount > 0 ? Math.max(14, (entry.count / peakCount) * 100) : 14
+            <div className="px-1">
+              <div className="flex h-20 items-end gap-1">
+                {mobileActivityLog.map((entry, i) => {
+                  const height = peakCount > 0 ? Math.max(14, (entry.count / peakCount) * 100) : 14
 
-                return (
-                  <div
-                    key={i}
-                    className="flex-1 rounded-[2px] border border-emerald-400/10"
-                    style={{
-                      height: `${height}%`,
-                      background:
-                        entry.level === 0
-                          ? 'rgba(255,255,255,0.045)'
-                          : `linear-gradient(to top, rgba(16,185,129,${Math.max(LOG_OPACITIES[entry.level] - 0.08, 0.16)}), rgba(74,222,128,${Math.max(LOG_OPACITIES[entry.level], 0.28)}))`,
-                    }}
-                  />
-                )
-              })}
+                  return (
+                    <div
+                      key={i}
+                      className="flex-1 rounded-[2px] border border-emerald-400/10"
+                      style={{
+                        height: `${height}%`,
+                        background:
+                          entry.level === 0
+                            ? 'rgba(255,255,255,0.045)'
+                            : `linear-gradient(to top, rgba(16,185,129,${Math.max(LOG_OPACITIES[entry.level] - 0.08, 0.16)}), rgba(74,222,128,${Math.max(LOG_OPACITIES[entry.level], 0.28)}))`,
+                      }}
+                    />
+                  )
+                })}
+              </div>
             </div>
 
             <div className="mt-2 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.22em] text-white/24">
@@ -191,34 +194,36 @@ export default function ContactDashboard({ activityLog = [], discord, email }: P
 
         {/* Render activityLog as horizontal bar chart */}
         <div className="hidden md:block">
-          <div className="flex h-5 w-full gap-[2px] overflow-hidden rounded-[1px]">
-            {activityLog.map((entry, i) => (
-              <div
-                key={i}
-                className="h-full grow cursor-default"
-                style={{
-                  backgroundColor: `rgba(52,211,153,${LOG_OPACITIES[entry.level]})`,
-                }}
-                onMouseEnter={(e) => {
-                  // Anchor to the bar element itself, not the cursor position.
-                  // getBoundingClientRect() returns viewport-relative coords that
-                  // are unaffected by subsequent scroll or layout shifts.
-                  const rect = e.currentTarget.getBoundingClientRect()
-                  setLogTooltip({
-                    entry,
-                    x: rect.left + rect.width / 2, // horizontal center of bar
-                    y: rect.top, // top edge of bar
-                  })
-                }}
-                onMouseLeave={() => setLogTooltip(null)}
-              />
-            ))}
+          <div className="pr-1">
+            <div className="flex h-5 w-full gap-[2px] overflow-hidden rounded-[1px]">
+              {activityLog.map((entry, i) => (
+                <div
+                  key={i}
+                  className="h-full grow cursor-default"
+                  style={{
+                    backgroundColor: `rgba(52,211,153,${LOG_OPACITIES[entry.level]})`,
+                  }}
+                  onMouseEnter={(e) => {
+                    // Anchor to the bar element itself, not the cursor position.
+                    // getBoundingClientRect() returns viewport-relative coords that
+                    // are unaffected by subsequent scroll or layout shifts.
+                    const rect = e.currentTarget.getBoundingClientRect()
+                    setLogTooltip({
+                      entry,
+                      x: rect.left + rect.width / 2, // horizontal center of bar
+                      y: rect.top, // top edge of bar
+                    })
+                  }}
+                  onMouseLeave={() => setLogTooltip(null)}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
       {/* ── [COMM] ──────────────────────────────────────────────────────────── */}
-      <div className={ROW} style={{ paddingLeft: CONTENT_LEFT }}>
+      <div className={ROW} style={{ paddingLeft: CONTENT_LEFT, paddingRight: CONTENT_RIGHT }}>
         <SpineNode />
         <div className="flex flex-wrap items-center gap-2.5">
           <Tag>[COMM]</Tag>
@@ -239,7 +244,7 @@ export default function ContactDashboard({ activityLog = [], discord, email }: P
       </div>
 
       {/* ── [TIME] ──────────────────────────────────────────────────────────── */}
-      <div className={ROW} style={{ paddingLeft: CONTENT_LEFT }}>
+      <div className={ROW} style={{ paddingLeft: CONTENT_LEFT, paddingRight: CONTENT_RIGHT }}>
         <SpineNode />
         <div className="flex flex-wrap items-center gap-2.5">
           <Tag>[TIME]</Tag>
@@ -251,7 +256,7 @@ export default function ContactDashboard({ activityLog = [], discord, email }: P
       </div>
 
       {/* ── [STAT] ──────────────────────────────────────────────────────────── */}
-      <div className={ROW} style={{ paddingLeft: CONTENT_LEFT }}>
+      <div className={ROW} style={{ paddingLeft: CONTENT_LEFT, paddingRight: CONTENT_RIGHT }}>
         <SpineNode />
         <div className="flex flex-wrap items-center gap-2.5">
           <Tag>[STAT]</Tag>
@@ -268,7 +273,7 @@ export default function ContactDashboard({ activityLog = [], discord, email }: P
       </div>
 
       {/* ── [MAIL] ──────────────────────────────────────────────────────────── */}
-      <div className={ROW} style={{ paddingLeft: CONTENT_LEFT }}>
+      <div className={ROW} style={{ paddingLeft: CONTENT_LEFT, paddingRight: CONTENT_RIGHT }}>
         <SpineNode />
         <div className="flex flex-wrap items-center gap-2.5">
           <Tag>[MAIL]</Tag>

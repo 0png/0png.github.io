@@ -86,7 +86,9 @@ const words = headline.split(' ')
       class="hero-trigger font-mono"
       aria-label="Open terminal command palette (Ctrl+K)"
     >
-      <span class="text-white/40">&gt; </span><span class="hero-type-1 text-white/40"></span><span class="hero-type-2 text-white/65"></span><span class="hero-type-3 text-white/40"></span><span class="hero-cursor text-white/50">_</span>
+      <span class="hero-trigger-shell">
+        <span class="hero-prompt text-white/40">&gt;</span><span class="hero-type-1 text-white/40"></span><span class="hero-type-2 text-white/65"></span><span class="hero-type-3 text-white/40"></span><span class="hero-cursor text-white/50">_</span>
+      </span>
     </button>
   </div>
 
@@ -208,16 +210,32 @@ const words = headline.split(' ')
   .hero-trigger {
     opacity: 0;
     transform: translateY(10px);
-    padding: 0.55rem 1.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    overflow: hidden;
+    white-space: nowrap;
+    padding: 0.55rem 1.15rem;
     border: 1px solid rgba(255, 255, 255, 0.09);
     border-radius: 6px;
     background: rgba(0, 0, 0, 0.45);
-    font-size: 0.8125rem;
+    font-size: clamp(0.75rem, 1.9vw, 0.8125rem);
     letter-spacing: 0.01em;
     cursor: pointer;
-    transition: box-shadow 0.25s ease, border-color 0.25s ease;
+    transition: box-shadow 0.25s ease, border-color 0.25s ease, background-color 0.25s ease;
     backdrop-filter: blur(6px);
     text-align: left;
+  }
+  .hero-trigger-shell {
+    display: inline-flex;
+    align-items: center;
+    min-width: max-content;
+  }
+  .hero-prompt {
+    margin-right: 0.46rem;
+  }
+  .hero-type-1:not(:empty) {
+    margin-right: 0.34rem;
   }
   .hero-trigger:hover {
     border-color: rgba(255, 255, 255, 0.18);
@@ -226,7 +244,17 @@ const words = headline.split(' ')
       0 0 40px rgba(255, 255, 255, 0.03),
       inset 0 0 0 1px rgba(255, 255, 255, 0.03);
   }
+  .hero-type-2 {
+    letter-spacing: -0.015em;
+  }
+  .hero-type-2:not(:empty) {
+    margin-right: 0.34rem;
+  }
+  .hero-type-3:not(:empty) {
+    margin-left: 0;
+  }
   .hero-cursor {
+    margin-left: 0.16rem;
     animation: cursor-blink 1.1s step-end infinite;
   }
   @keyframes cursor-blink {
@@ -239,6 +267,14 @@ const words = headline.split(' ')
   .hero-scroll-line {
     transform: scaleY(0);
     transform-origin: top;
+  }
+
+  @media (max-width: 430px) {
+    .hero-trigger {
+      padding: 0.5rem 0.9rem;
+      font-size: 0.75rem;
+      letter-spacing: 0;
+    }
   }
 
   /* ── Reduced motion ───────────────────────────────────────── */
@@ -278,6 +314,11 @@ const words = headline.split(' ')
   const orb3 = hero.querySelector<HTMLElement>('.hero-orb-3')!
   const dots = hero.querySelector<HTMLElement>('.hero-dots')!
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  const triggerParts = [
+    { el: hero.querySelector<HTMLElement>('.hero-type-1')!, text: 'press' },
+    { el: hero.querySelector<HTMLElement>('.hero-type-2')!, text: '[Ctrl + K]' },
+    { el: hero.querySelector<HTMLElement>('.hero-type-3')!, text: 'to launch terminal' },
+  ]
 
   // ── Mouse-tracking spotlight + 3D content tilt ────────────
   hero.addEventListener('mousemove', (e) => {
@@ -320,36 +361,38 @@ const words = headline.split(' ')
     window.dispatchEvent(new Event('open-terminal'))
   })
 
+  function setTriggerText(charCount: number) {
+    let remaining = charCount
+    for (const part of triggerParts) {
+      const chunk = Math.min(remaining, part.text.length)
+      part.el.textContent = part.text.slice(0, chunk)
+      remaining -= chunk
+    }
+  }
+
+  function measureTriggerWidths() {
+    triggerParts.forEach((part) => {
+      part.el.textContent = part.text
+    })
+
+    const fullWidth = Math.ceil(trigger.scrollWidth)
+    const collapsedWidth = Math.ceil(Math.max(trigger.offsetHeight + 6, 40))
+
+    setTriggerText(0)
+
+    return { fullWidth, collapsedWidth }
+  }
+
   // ── Typewriter loop for terminal trigger ───────────────────
   function startTypewriter() {
-    const parts = [
-      { el: hero.querySelector<HTMLElement>('.hero-type-1')!, text: 'press ' },
-      { el: hero.querySelector<HTMLElement>('.hero-type-2')!, text: '[Ctrl + K]' },
-      { el: hero.querySelector<HTMLElement>('.hero-type-3')!, text: ' to launch terminal' },
-    ]
-    const totalChars = parts.reduce((s, p) => s + p.text.length, 0)
-
-    // Lock width to full text so the button never resizes
-    parts.forEach((p) => (p.el.textContent = p.text))
-    trigger.style.minWidth = trigger.offsetWidth + 'px'
-    parts.forEach((p) => (p.el.textContent = ''))
-
-    // Always update ALL spans so clearing works correctly across part boundaries
-    function renderAt(count: number) {
-      let remaining = count
-      for (const part of parts) {
-        const chunk = Math.min(remaining, part.text.length)
-        part.el.textContent = part.text.slice(0, chunk)
-        remaining -= chunk
-      }
-    }
+    const totalChars = triggerParts.reduce((sum, part) => sum + part.text.length, 0)
 
     function scheduleType(charIndex: number) {
       if (charIndex > totalChars) {
         gsap.delayedCall(2.2, () => scheduleDelete(totalChars))
         return
       }
-      renderAt(charIndex)
+      setTriggerText(charIndex)
 
       const progress = charIndex / totalChars
       const eased = 0.5 - 0.5 * Math.cos(Math.PI * progress)
@@ -364,7 +407,7 @@ const words = headline.split(' ')
         gsap.delayedCall(0.55, () => scheduleType(0))
         return
       }
-      renderAt(charIndex)
+      setTriggerText(charIndex)
 
       const progress = charIndex / totalChars
       const eased = Math.pow(progress, 0.45)
@@ -383,13 +426,37 @@ const words = headline.split(' ')
   function startHeroEntrance() {
     if (heroEntranceStarted || reduceMotion) return
     heroEntranceStarted = true
+    const { fullWidth, collapsedWidth } = measureTriggerWidths()
+    const triggerStyles = window.getComputedStyle(trigger)
+    const expandedPaddingLeft = Number.parseFloat(triggerStyles.paddingLeft)
+    const expandedPaddingRight = Number.parseFloat(triggerStyles.paddingRight)
 
     gsap
       .timeline({ defaults: { ease: 'power3.out' } })
       .to(badge, { opacity: 1, y: 0, duration: 0.7, delay: 0.08 })
       .to(words, { opacity: 1, y: 0, duration: 0.8, stagger: 0.055 }, '-=0.35')
       .to(rule, { opacity: 1, scaleX: 1, duration: 0.7, ease: 'power2.inOut' }, '-=0.4')
-      .to(trigger, { opacity: 1, y: 0, duration: 0.55, onComplete: startTypewriter }, '-=0.3')
+      .fromTo(
+        trigger,
+        {
+          opacity: 0,
+          y: 10,
+          width: collapsedWidth,
+          paddingLeft: 12,
+          paddingRight: 12,
+        },
+        {
+          opacity: 1,
+          y: 0,
+          width: fullWidth,
+          paddingLeft: expandedPaddingLeft,
+          paddingRight: expandedPaddingRight,
+          duration: 0.72,
+          ease: 'expo.out',
+          onComplete: startTypewriter,
+        },
+        '-=0.3',
+      )
       .to(indicator, { opacity: 1, duration: 0.5 }, '-=0.3')
       .to(scrollLine, { scaleY: 1, duration: 1, ease: 'power2.inOut' }, '<')
   }
