@@ -1,0 +1,72 @@
+---
+interface Props {
+  projectCount: number
+  featuredCount: number
+  latestYear: number
+  allTags: string[]
+}
+
+const { projectCount, featuredCount, latestYear, allTags } = Astro.props
+---
+
+<section class="projects-hero-stage" aria-labelledby="projects-title">
+  <a href="/" class="projects-back-link" data-projects-reveal>
+    <span aria-hidden="true">&lt;</span>
+    ~/home
+  </a>
+
+  <div class="projects-hero-panel" data-projects-reveal>
+    <div class="projects-panel-line" aria-hidden="true"></div>
+    <div class="projects-hero-grid">
+      <div class="projects-hero-copy">
+        <div class="projects-command-line">
+          <span class="text-dim">$</span>
+          <span>ls --depth --interactive ./projects</span>
+          <span class="command-head">STACK@{String(projectCount).padStart(2, '0')}</span>
+        </div>
+
+        <p class="projects-kicker">/usr/local/portfolio.project-stack</p>
+
+        <h1 id="projects-title" class="projects-title">PROJECTS</h1>
+
+        <p class="projects-lede">
+          A deep stack of shipped tools, launchers, solvers, and interface
+          experiments. Scroll through each build panel like a scrubbed
+          terminal reel, then jump into the devlog behind the project.
+        </p>
+      </div>
+
+      <div class="projects-stat-panel" aria-label="Project page stats">
+        <div class="projects-stat-grid">
+          <div>
+            <p>builds</p>
+            <strong>{projectCount}</strong>
+          </div>
+          <div>
+            <p>featured</p>
+            <strong>{featuredCount}</strong>
+          </div>
+        </div>
+        <div class="projects-stat-wide">
+          <p>latest deploy</p>
+          <strong>{latestYear}</strong>
+        </div>
+        <div class="projects-stat-wide">
+          <p>visible</p>
+          <strong data-project-count>{projectCount}</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="projects-filter-bar" data-projects-reveal aria-label="Filter projects by tag">
+    <button type="button" class="filter-chip is-active" data-project-filter="all">All Builds</button>
+    {
+      allTags.map((tag) => (
+        <button type="button" class="filter-chip" data-project-filter={tag}>
+          {tag}
+        </button>
+      ))
+    }
+  </div>
+</section>

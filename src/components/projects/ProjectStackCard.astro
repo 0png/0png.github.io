@@ -1,0 +1,73 @@
+---
+import type { Project } from '@/data/projects'
+
+interface Props {
+  project: Project
+  index: number
+}
+
+const { project, index } = Astro.props
+const isReversed = index % 2 === 1
+---
+
+<article
+  id={project.id}
+  class={`project-stack-card ${isReversed ? 'is-reversed' : ''}`}
+  data-project-card
+  data-projects-reveal
+  data-project-depth
+  data-project-tags={project.tags.join('|')}
+  style={`--project-index: ${index}; --stack-side: ${isReversed ? -1 : 1};`}
+>
+  <div class="project-stack-lock" data-project-lock>
+    <div class="project-panel">
+      <div class="project-panel-media" data-project-media>
+        {
+          project.coverImage ? (
+            <img src={project.coverImage} alt={`Cover image for ${project.title}`} />
+          ) : (
+            <div class="project-generated-visual" aria-hidden="true">
+              <span>{String(index + 1).padStart(2, '0')}</span>
+              <strong>{project.year}</strong>
+            </div>
+          )
+        }
+        <div class="project-panel-scan" aria-hidden="true"></div>
+      </div>
+
+      <div class="project-panel-copy">
+        <div class="project-panel-meta">
+          <span>build {String(index + 1).padStart(2, '0')}</span>
+          <span>{project.year}</span>
+        </div>
+
+        <h2>{project.title}</h2>
+        <p>{project.excerpt}</p>
+
+        <div class="project-tag-row" aria-label={`${project.title} tags`}>
+          {
+            project.tags.map((tag) => (
+              <span>{tag}</span>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="project-node-callout" data-project-callout>
+      <div class="project-node-dot" aria-hidden="true"></div>
+      <div class="project-callout-line" aria-hidden="true"></div>
+      <div class="project-callout-copy">
+        <p>{project.description}</p>
+        {
+          project.devlogSlug !== null && (
+            <a href={`/projects/${project.devlogSlug}`} class="project-devlog-link">
+              Read Devlog
+              <span aria-hidden="true">-&gt;</span>
+            </a>
+          )
+        }
+      </div>
+    </div>
+  </div>
+</article>
