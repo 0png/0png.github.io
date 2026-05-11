@@ -96,39 +96,31 @@ const { bio: _bio } = Astro.props
 
           <!-- macOS window chrome -->
           <div class="flex items-center gap-2 border-b border-white/[0.07] bg-black/80 px-4 py-3">
+            <div class="group flex gap-1.5" aria-hidden="true">
+              <!-- Red — close -->
+              <div class="relative flex h-3 w-3 items-center justify-center rounded-full bg-[#ff5f57]">
+                <svg class="absolute opacity-0 transition-opacity duration-150 group-hover:opacity-100" width="8" height="8" viewBox="0 0 8 8" fill="none">
+                  <line x1="2" y1="2" x2="6" y2="6" stroke="#4d0000" stroke-width="1.35" stroke-linecap="round" />
+                  <line x1="6" y1="2" x2="2" y2="6" stroke="#4d0000" stroke-width="1.35" stroke-linecap="round" />
+                </svg>
+              </div>
 
-            <!-- Red — close -->
-            <button
-              class="group relative flex h-3 w-3 items-center justify-center rounded-full bg-[#ff5f57]"
-              aria-hidden="true"
-              tabindex="-1"
-            >
-              <svg class="absolute opacity-0 transition-opacity duration-150 group-hover:opacity-100" width="6" height="6" viewBox="0 0 6 6" fill="none">
-                <path d="M1 1l4 4M5 1L1 5" stroke="#6b0000" stroke-width="1.3" stroke-linecap="round"/>
-              </svg>
-            </button>
+              <!-- Yellow — minimise -->
+              <div class="relative flex h-3 w-3 items-center justify-center rounded-full bg-[#febc2e]">
+                <svg class="absolute opacity-0 transition-opacity duration-150 group-hover:opacity-100" width="8" height="8" viewBox="0 0 8 8" fill="none">
+                  <line x1="2" y1="4" x2="6" y2="4" stroke="#4d3200" stroke-width="1.35" stroke-linecap="round" />
+                </svg>
+              </div>
 
-            <!-- Yellow — minimise -->
-            <button
-              class="group relative flex h-3 w-3 items-center justify-center rounded-full bg-[#febc2e]"
-              aria-hidden="true"
-              tabindex="-1"
-            >
-              <svg class="absolute opacity-0 transition-opacity duration-150 group-hover:opacity-100" width="6" height="6" viewBox="0 0 6 6" fill="none">
-                <path d="M1 3h4" stroke="#5a3a00" stroke-width="1.3" stroke-linecap="round"/>
-              </svg>
-            </button>
-
-            <!-- Green — expand -->
-            <button
-              class="group relative flex h-3 w-3 items-center justify-center rounded-full bg-[#28c840]"
-              aria-hidden="true"
-              tabindex="-1"
-            >
-              <svg class="absolute opacity-0 transition-opacity duration-150 group-hover:opacity-100" width="6" height="6" viewBox="0 0 6 6" fill="none">
-                <path d="M3 1v4M1 3h4" stroke="#004010" stroke-width="1.3" stroke-linecap="round"/>
-              </svg>
-            </button>
+              <!-- Green — expand -->
+              <div class="relative flex h-3 w-3 items-center justify-center rounded-full bg-[#28c840]">
+                <svg class="absolute opacity-0 transition-opacity duration-150 group-hover:opacity-100" width="8" height="8" viewBox="0 0 8 8" fill="none">
+                  <line x1="2" y1="6" x2="6" y2="2" stroke="#003200" stroke-width="1.2" stroke-linecap="round" />
+                  <path d="M2 4.75V6H3.25" stroke="#003200" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M4.75 2H6V3.25" stroke="#003200" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </div>
+            </div>
 
             <span class="ml-4 font-mono text-xs text-white/25">~/0png — zsh</span>
           </div>
