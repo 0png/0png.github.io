@@ -48,4 +48,10 @@ describe('standalone changelog page redesign', () => {
     expect(page).toContain('data-expanded')
     expect(page).toContain('scrambleHash')
   })
+
+  it('expands commit bodies to their real content height instead of a fixed rem cap', () => {
+    expect(page).toContain('shell.style.maxHeight')
+    expect(page).toContain('shell.scrollHeight')
+    expect(page).not.toContain("max-height: 34rem;")
+  })
 })

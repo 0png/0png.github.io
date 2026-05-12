@@ -428,10 +428,6 @@ function stripPrefix(subject: string): string {
     max-height: 4.75rem;
   }
 
-  .commit-entry[data-expanded='true'] [data-body-shell] {
-    max-height: 34rem;
-  }
-
   .commit-entry.is-active .commit-node {
     transform: scale(1.18);
   }
@@ -470,6 +466,7 @@ function stripPrefix(subject: string): string {
   const spineProgress = document.querySelector<HTMLElement>('[data-spine-progress]')
   const commitStream = document.querySelector<HTMLElement>('[data-commit-stream]')
   let activeType = 'all'
+  const COLLAPSED_BODY_HEIGHT = '4.75rem'
 
   function scrambleHash(el: HTMLElement) {
     if (reduceMotion) return
@@ -497,12 +494,21 @@ function stripPrefix(subject: string): string {
     tick()
   }
 
+  function syncBodyShellHeight(entry: HTMLElement) {
+    const shell = entry.querySelector<HTMLElement>('[data-body-shell]')
+    if (!shell) return
+
+    const expanded = entry.dataset.expanded === 'true'
+    shell.style.maxHeight = expanded ? `${shell.scrollHeight}px` : COLLAPSED_BODY_HEIGHT
+  }
+
   function setBodyExpanded(entry: HTMLElement, expanded: boolean) {
     const shell = entry.querySelector<HTMLElement>('[data-body-shell]')
     const button = entry.querySelector<HTMLButtonElement>('[data-toggle-body]')
     if (!shell || !button) return
 
     entry.dataset.expanded = String(expanded)
+    shell.style.maxHeight = expanded ? `${shell.scrollHeight}px` : COLLAPSED_BODY_HEIGHT
     button.setAttribute('aria-expanded', String(expanded))
     button.textContent = expanded ? 'collapse body' : 'expand body'
   }
@@ -575,6 +581,8 @@ function stripPrefix(subject: string): string {
     const hash = entry.querySelector<HTMLElement>('.commit-hash')
     const toggle = entry.querySelector<HTMLButtonElement>('[data-toggle-body]')
 
+    syncBodyShellHeight(entry)
+
     if (toggle) {
       toggle.addEventListener('click', () => {
         setBodyExpanded(entry, entry.dataset.expanded !== 'true')
@@ -627,6 +635,11 @@ function stripPrefix(subject: string): string {
   })
   collapseAll?.addEventListener('click', () => {
     entries.forEach((entry) => setBodyExpanded(entry, false))
+    ScrollTrigger.refresh()
+  })
+
+  window.addEventListener('resize', () => {
+    entries.forEach((entry) => syncBodyShellHeight(entry))
     ScrollTrigger.refresh()
   })
 
