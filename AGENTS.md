@@ -23,8 +23,10 @@ The site presents 0PNG as a secondary school student, AI developer, and runner. 
 - `src/layouts/BaseLayout.astro` - global layout, metadata, navbar, smooth scroll, terminal palette mount, mobile notice.
 - `src/components/Hero.astro` - animated hero and terminal trigger.
 - `src/components/TerminalPalette.tsx` - global Ctrl/Cmd+K terminal-style command palette.
+- `src/components/terminal/*` and `src/lib/terminal/*` - split terminal palette UI, output rendering, and command/path helpers.
 - `src/components/About.astro` - about section with HUD-style details.
 - `src/components/ProjectsSection.astro` and `src/components/ProjectCard.astro` - homepage project display.
+- `src/components/projects/*`, `src/pages/projects/index.astro`, `src/lib/projects-page.ts`, and `src/scripts/projects-page.ts` - standalone `/projects` route composition, stack card UI, and page behavior.
 - `src/components/ContactSection.astro` and `src/components/ContactDashboard.tsx` - contact section, contribution activity chart, HKT clock, Discord copy action.
 - `src/data/siteConfig.ts` - site identity, headline, bio, GitHub URL, year.
 - `src/data/projects.ts` - project cards and homepage/project listing metadata.
@@ -77,6 +79,10 @@ The site can build without secrets.
 - Preserve the terminal/HUD-inspired visual language: monospace labels, dark neutral surfaces, subtle borders, glass/backdrop effects, and restrained green/blue terminal accents.
 - Prefer Astro components for static sections and React islands only where client interactivity is needed.
 - Keep global interactive behavior in well-scoped components such as `TerminalPalette.tsx` and `src/lib/scroll.ts`.
+- When a file grows too large, treat that as a maintenance risk automatically. If a UI file is clearly oversized or mixes data prep, markup, styles, and browser behavior in one place, start planning a refactor instead of extending the file further.
+- For this repo, large route files should be split conservatively: move markup into focused components, move pure helpers into `src/lib/*`, move page behavior into `src/scripts/*`, and keep page-owned styles centralized when cross-component selectors or `data-*` hooks would be fragile under Astro style scoping.
+- Preserve route boundaries carefully. `src/pages/projects/index.astro` is the standalone `/projects` listing surface, while `src/pages/projects/[slug].astro` and `src/layouts/BlogLayout.astro` are the per-project devlog surface; do not mix them during refactors.
+- When refactoring interaction-heavy pages, keep existing class names, `data-*` attributes, and mobile resets stable unless the task explicitly asks for behavioral changes. This is especially important for `/projects` filter hooks, depth transforms, reversed card layouts, and callout placement.
 - The homepage is animation-heavy; verify changes visually on desktop and mobile when touching layout, GSAP animation, scroll behavior, or responsive sections.
 - Do not hand-edit `src/data/changelog.json` for normal changelog updates; it is generated from git history.
 - Avoid unrelated rewrites of generated or automation-managed files unless the task specifically calls for them.

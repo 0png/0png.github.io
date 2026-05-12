@@ -52,9 +52,76 @@ function Sep() {
   return <span className="shrink-0 font-mono text-[13px] text-white/20 leading-none">›</span>
 }
 
+function ActivitySummaryChart({
+  activityLog,
+  activeDays,
+  commits,
+  peakCount,
+  className = '',
+}: {
+  activityLog: ActivityLogEntry[]
+  activeDays: number
+  commits: number
+  peakCount: number
+  className?: string
+}) {
+  return (
+    <div className={className}>
+      <div className="grid grid-cols-2 gap-2">
+        <div className="rounded-sm border border-white/[0.08] bg-white/[0.02] px-3 py-2.5">
+          <div className="font-mono text-[10px] uppercase tracking-[0.26em] text-white/30">30d commits</div>
+          <div className="mt-1 font-mono text-base text-neutral-100">{commits.toLocaleString()}</div>
+        </div>
+        <div className="rounded-sm border border-white/[0.08] bg-white/[0.02] px-3 py-2.5">
+          <div className="font-mono text-[10px] uppercase tracking-[0.26em] text-white/30">active days</div>
+          <div className="mt-1 font-mono text-base text-neutral-100">
+            {activeDays}
+            <span className="ml-1 text-[11px] text-white/30">/ 30</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-sm border border-white/[0.08] bg-gradient-to-b from-white/[0.03] to-white/[0.015] px-3 py-3">
+        <div className="mb-2 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.24em] text-white/28">
+          <span>Recent Month</span>
+          <span>peak {peakCount}</span>
+        </div>
+
+        <div className="px-1">
+          <div className="flex h-20 items-end gap-1">
+            {activityLog.map((entry, i) => {
+              const height = peakCount > 0 ? Math.max(14, (entry.count / peakCount) * 100) : 14
+
+              return (
+                <div
+                  key={i}
+                  className="flex-1 rounded-[2px] border border-emerald-400/10"
+                  style={{
+                    height: `${height}%`,
+                    background:
+                      entry.level === 0
+                        ? 'rgba(255,255,255,0.045)'
+                        : `linear-gradient(to top, rgba(16,185,129,${Math.max(LOG_OPACITIES[entry.level] - 0.08, 0.16)}), rgba(74,222,128,${Math.max(LOG_OPACITIES[entry.level], 0.28)}))`,
+                  }}
+                />
+              )
+            })}
+          </div>
+        </div>
+
+        <div className="mt-2 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.22em] text-white/24">
+          <span>30 days ago</span>
+          <span>today</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── Main component ────────────────────────────────────────────────────────────
 
 export default function ContactDashboard({ activityLog = [], discord, email }: Props) {
+  const [activityView, setActivityView] = useState<'heatmap' | 'chart'>('heatmap')
   const [logTooltip, setLogTooltip] = useState<{
     entry: ActivityLogEntry
     // Fixed viewport coords derived from getBoundingClientRect — stable across scroll/layout shifts
@@ -133,92 +200,88 @@ export default function ContactDashboard({ activityLog = [], discord, email }: P
       <div className={ROW} style={{ paddingLeft: CONTENT_LEFT, paddingRight: CONTENT_RIGHT }}>
         <SpineNode />
 
-        <div className="mb-3 flex flex-wrap items-baseline gap-2">
-          <Tag>[ACTIVITY]</Tag>
-          <Sep />
-          <span className="font-mono text-sm text-neutral-200">
-            {totalCommits.toLocaleString()} commits
-          </span>
-          <span className="font-mono text-[11px] text-white/25">// last {activityLog.length} days</span>
-        </div>
-
-        <div className="space-y-3 md:hidden">
-          <div className="grid grid-cols-2 gap-2">
-            <div className="rounded-sm border border-white/[0.08] bg-white/[0.02] px-3 py-2.5">
-              <div className="font-mono text-[10px] uppercase tracking-[0.26em] text-white/30">30d commits</div>
-              <div className="mt-1 font-mono text-base text-neutral-100">{mobileCommits.toLocaleString()}</div>
-            </div>
-            <div className="rounded-sm border border-white/[0.08] bg-white/[0.02] px-3 py-2.5">
-              <div className="font-mono text-[10px] uppercase tracking-[0.26em] text-white/30">active days</div>
-              <div className="mt-1 font-mono text-base text-neutral-100">
-                {activeDays}
-                <span className="ml-1 text-[11px] text-white/30">/ 30</span>
-              </div>
-            </div>
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-baseline gap-2">
+            <Tag>[ACTIVITY]</Tag>
+            <Sep />
+            <span className="font-mono text-sm text-neutral-200">
+              {totalCommits.toLocaleString()} commits
+            </span>
+            <span className="font-mono text-[11px] text-white/25">// last {activityLog.length} days</span>
           </div>
 
-          <div className="rounded-sm border border-white/[0.08] bg-gradient-to-b from-white/[0.03] to-white/[0.015] px-3 py-3">
-            <div className="mb-2 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.24em] text-white/28">
-              <span>Recent Month</span>
-              <span>peak {peakCount}</span>
-            </div>
-
-            <div className="px-1">
-              <div className="flex h-20 items-end gap-1">
-                {mobileActivityLog.map((entry, i) => {
-                  const height = peakCount > 0 ? Math.max(14, (entry.count / peakCount) * 100) : 14
-
-                  return (
-                    <div
-                      key={i}
-                      className="flex-1 rounded-[2px] border border-emerald-400/10"
-                      style={{
-                        height: `${height}%`,
-                        background:
-                          entry.level === 0
-                            ? 'rgba(255,255,255,0.045)'
-                            : `linear-gradient(to top, rgba(16,185,129,${Math.max(LOG_OPACITIES[entry.level] - 0.08, 0.16)}), rgba(74,222,128,${Math.max(LOG_OPACITIES[entry.level], 0.28)}))`,
-                      }}
-                    />
-                  )
-                })}
-              </div>
-            </div>
-
-            <div className="mt-2 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.22em] text-white/24">
-              <span>30 days ago</span>
-              <span>today</span>
-            </div>
+          <div
+            className="hidden rounded-sm border border-white/[0.08] bg-white/[0.025] p-0.5 md:inline-flex"
+            aria-label="Activity display mode"
+          >
+            {(['heatmap', 'chart'] as const).map((view) => (
+              <button
+                key={view}
+                type="button"
+                onClick={() => setActivityView(view)}
+                className="cursor-pointer rounded-[2px] px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.22em] transition-all duration-200"
+                style={{
+                  color: activityView === view ? 'rgb(209,250,229)' : 'rgba(255,255,255,0.32)',
+                  background:
+                    activityView === view
+                      ? 'linear-gradient(135deg, rgba(16,185,129,0.18), rgba(255,255,255,0.055))'
+                      : 'transparent',
+                  boxShadow:
+                    activityView === view ? 'inset 0 0 0 1px rgba(52,211,153,0.24)' : 'none',
+                }}
+                aria-pressed={activityView === view}
+              >
+                {view}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Render activityLog as horizontal bar chart */}
+        <ActivitySummaryChart
+          activityLog={mobileActivityLog}
+          activeDays={activeDays}
+          commits={mobileCommits}
+          peakCount={peakCount}
+          className="space-y-3 md:hidden"
+        />
+
+        {/* Render activityLog as horizontal bar heatmap */}
         <div className="hidden md:block">
-          <div className="pr-1">
-            <div className="flex h-5 w-full gap-[2px] overflow-hidden rounded-[1px]">
-              {activityLog.map((entry, i) => (
-                <div
-                  key={i}
-                  className="h-full grow cursor-default"
-                  style={{
-                    backgroundColor: `rgba(52,211,153,${LOG_OPACITIES[entry.level]})`,
-                  }}
-                  onMouseEnter={(e) => {
-                    // Anchor to the bar element itself, not the cursor position.
-                    // getBoundingClientRect() returns viewport-relative coords that
-                    // are unaffected by subsequent scroll or layout shifts.
-                    const rect = e.currentTarget.getBoundingClientRect()
-                    setLogTooltip({
-                      entry,
-                      x: rect.left + rect.width / 2, // horizontal center of bar
-                      y: rect.top, // top edge of bar
-                    })
-                  }}
-                  onMouseLeave={() => setLogTooltip(null)}
-                />
-              ))}
+          {activityView === 'heatmap' ? (
+            <div className="pr-1">
+              <div className="flex h-5 w-full gap-[2px] overflow-hidden rounded-[1px]">
+                {activityLog.map((entry, i) => (
+                  <div
+                    key={i}
+                    className="h-full grow cursor-default"
+                    style={{
+                      backgroundColor: `rgba(52,211,153,${LOG_OPACITIES[entry.level]})`,
+                    }}
+                    onMouseEnter={(e) => {
+                      // Anchor to the bar element itself, not the cursor position.
+                      // getBoundingClientRect() returns viewport-relative coords that
+                      // are unaffected by subsequent scroll or layout shifts.
+                      const rect = e.currentTarget.getBoundingClientRect()
+                      setLogTooltip({
+                        entry,
+                        x: rect.left + rect.width / 2, // horizontal center of bar
+                        y: rect.top, // top edge of bar
+                      })
+                    }}
+                    onMouseLeave={() => setLogTooltip(null)}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
+          ) : (
+            <ActivitySummaryChart
+              activityLog={mobileActivityLog}
+              activeDays={activeDays}
+              commits={mobileCommits}
+              peakCount={peakCount}
+              className="grid gap-3 lg:grid-cols-[0.7fr_1fr]"
+            />
+          )}
         </div>
       </div>
 
