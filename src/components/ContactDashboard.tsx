@@ -294,6 +294,7 @@ export default function ContactDashboard({ activityLog = [], discord, email }: P
           <span className="font-mono text-[12px] text-white/35">Discord:</span>
           <span className="font-mono text-sm text-neutral-200">{discord}</span>
           <button
+            type="button"
             onClick={copyDiscord}
             className="cursor-pointer rounded-sm border px-1.5 py-0.5 font-mono text-[10px] tracking-widest transition-all duration-200"
             style={{

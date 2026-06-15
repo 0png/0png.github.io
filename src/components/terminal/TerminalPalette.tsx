@@ -192,6 +192,7 @@ export default function TerminalPalette() {
             onMouseLeave={() => setDotHover(false)}
           >
             <button
+              type="button"
               onClick={closePalette}
               className="flex h-3 w-3 items-center justify-center rounded-full bg-[#ff5f57] transition-opacity hover:opacity-90"
               aria-label="Close terminal"
@@ -205,6 +206,7 @@ export default function TerminalPalette() {
             </button>
 
             <button
+              type="button"
               onClick={() => setLines([])}
               className="flex h-3 w-3 items-center justify-center rounded-full bg-[#febc2e] transition-opacity hover:opacity-90"
               aria-label="Clear terminal output"
@@ -217,6 +219,7 @@ export default function TerminalPalette() {
             </button>
 
             <button
+              type="button"
               onClick={() => setIsMaximized((value) => !value)}
               className="flex h-3 w-3 items-center justify-center rounded-full bg-[#28c840] transition-opacity hover:opacity-90"
               aria-label={isMaximized ? 'Restore terminal' : 'Maximize terminal'}
